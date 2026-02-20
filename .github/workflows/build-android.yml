@@ -1,0 +1,43 @@
+name: Build Android APK
+
+on:
+  push:
+    branches:
+      - main # Se ejecuta cuando subes cambios a main
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Instalar Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: 18
+
+      - name: Instalar dependencias y construir React
+        run: |
+          npm install
+          npm run build # Genera la carpeta dist
+
+      - name: Sincronizar Capacitor
+        run: |
+          npx cap sync android
+
+      - name: Configurar Java (Necesario para Android)
+        uses: actions/setup-java@v3
+        with:
+          distribution: 'zulu'
+          java-version: '17'
+
+      - name: Construir el APK con Gradle
+        run: |
+          cd android
+          ./gradlew assembleDebug
+
+      - name: Subir el APK a GitHub
+        uses: actions/upload-artifact@v4
+        with:
+          name: app-debug
+          path: android/app/build/outputs/apk/debug/app-debug.apk
