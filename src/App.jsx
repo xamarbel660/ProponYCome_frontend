@@ -1,9 +1,12 @@
 import { createBrowserRouter, Navigate } from 'react-router';
 import { RouterProvider } from 'react-router/dom';
-import Inicio from './components/Inicio';
 import AuthPage from './pages/AuthPage';
+import Compras from './pages/Compras';
 import ErrorPage from './pages/ErrorPage';
+import Familias from './pages/Familias';
 import Home from './pages/Home';
+import IA from './pages/IA';
+import Planning from './pages/Planning';
 import Recetas from './pages/Recetas';
 import useAuthStore from './store/authStore';
 
@@ -15,7 +18,7 @@ const RutaPrivada = ({ children }) => {
 };
 
 // GUARDIA PÚBLICO: Solo deja pasar si NO estás logueado
-// (Para que si ya estás dentro, no veas el Login otra vez)
+// Para que si ya estás dentro, no veas el Login otra vez
 const RutaPublica = ({ children }) => {
 	const isAuth = useAuthStore(state => state.isAuth);
 	// Si YA está logueado, mándalo directo a casa
@@ -50,10 +53,13 @@ const router = createBrowserRouter([
 		children: [
 			{
 				index: true, // Esto es la ruta "/" exacta
-				Component: Inicio,
+				Component: Recetas,
 			},
 			// Aquí irán las recetas, perfil, etc.
-			{ path: 'recetas', element: <Recetas /> },
+			{ path: 'planning', element: <Planning /> },
+			{ path: 'familias', element: <Familias /> },
+			{ path: 'compras', element: <Compras /> },
+			{ path: 'ia', element: <IA /> },
 		],
 	},
 ]);

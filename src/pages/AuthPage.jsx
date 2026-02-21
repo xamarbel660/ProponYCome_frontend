@@ -1,151 +1,33 @@
-// import { useState } from 'react';
-// import { useNavigate } from 'react-router-dom';
-// import useAuthStore from '../store/authStore';
-// import api from '../utils/api';
-// import { Box, Paper, Stack, Typography } from '@mui/material';
-
-// function AuthPage() {
-// 	const navigate = useNavigate();
-// 	const login = useAuthStore(state => state.login);
-
-// 	const [usuarioLogin, setUsuarioLogin] = useState({
-// 		email: '',
-// 		password_hash: '',
-// 	});
-
-// 	const [usuarioRegister, setUsuarioRegister] = useState({
-// 		nombre: '',
-// 		email: '',
-// 		password_hash: '',
-// 	});
-
-// 	const handleLogin = async e => {
-// 		e.preventDefault();
-// 		try {
-// 			// 1. Petición al backend
-// 			const { datos, token } = await api.post('/usuarios/login', usuarioLogin);
-
-// 			// 2. Si llega aquí, es que todo fue bien. Guardamos en Zustand.
-// 			// Asegúrate que tu backend devuelve { token: "...", usuario: {...} }
-// 			login(token, datos);
-
-// 			// 3. Nos vamos a la zona privada
-// 			navigate('/');
-// 		} catch (error) {
-// 			alert('Error: ' + (error.response?.data?.msg || 'Fallo al logearse'));
-// 		}
-// 	};
-
-// 	const handleRegister = async e => {
-// 		e.preventDefault();
-// 		try {
-// 			const { datos, token } = await api.post('/usuarios/register', usuarioRegister);
-
-// 			login(token, datos);
-
-// 			navigate('/');
-// 		} catch (error) {
-// 			alert('Error: ' + (error.response?.data?.msg || 'Fallo al registrar'));
-// 		}
-// 	};
-
-// 	return (
-// 		<>
-// 			<div style={{ padding: 20 }}>
-// 				<h1>Login de Prueba</h1>
-// 				<form onSubmit={handleLogin}>
-// 					<input
-// 						type="email"
-// 						placeholder="Email"
-// 						value={usuarioLogin.email}
-// 						onChange={e => setUsuarioLogin({ ...usuarioLogin, email: e.target.value })}
-// 					/>
-// 					<br />
-// 					<br />
-// 					<input
-// 						type="password"
-// 						placeholder="Contraseña"
-// 						value={usuarioLogin.password_hash}
-// 						onChange={e => setUsuarioLogin({ ...usuarioLogin, password_hash: e.target.value })}
-// 					/>
-// 					<br />
-// 					<br />
-// 					<button type="submit">Login</button>
-// 				</form>
-// 			</div>
-// 			<div style={{ padding: 20 }}>
-// 				<h1>Registro de Prueba</h1>
-// 				<form onSubmit={handleRegister}>
-// 					<input
-// 						type="text"
-// 						placeholder="Nombre"
-// 						value={usuarioRegister.nombre}
-// 						onChange={e => setUsuarioRegister({ ...usuarioRegister, nombre: e.target.value })}
-// 					/>
-// 					<br />
-// 					<br />
-// 					<input
-// 						type="email"
-// 						placeholder="Email"
-// 						value={usuarioRegister.email}
-// 						onChange={e => setUsuarioRegister({ ...usuarioRegister, email: e.target.value })}
-// 					/>
-// 					<br />
-// 					<br />
-// 					<input
-// 						type="password"
-// 						placeholder="Contraseña"
-// 						value={usuarioRegister.password_hash}
-// 						onChange={e => setUsuarioRegister({ ...usuarioRegister, password_hash: e.target.value })}
-// 					/>
-// 					<br />
-// 					<br />
-// 					<button type="submit">Register</button>
-// 				</form>
-// 			</div>
-// 			{/* Usamos Box con p={2} (padding) para que el texto no pegue con los bordes del móvil */}
-// 			{/* <Box sx={{ p: 2 }}>
-// 				<Stack spacing={2}>
-// 					<Paper sx={{ p: 2 }}>
-// 						<Typography>Bienvenido a la App</Typography>
-// 					</Paper>
-
-// 					<Box sx={{ height: '1000px', bgcolor: '#eee' }}>
-// 						<Typography>Contenido largo...</Typography>
-// 					</Box>
-// 				</Stack>
-// 			</Box> */}
-// 		</>
-// 	);
-// }
-
-// export default AuthPage;
-
+import {
+	Alert,
+	Avatar,
+	Box,
+	Button,
+	CssBaseline,
+	Paper,
+	Stack,
+	TextField,
+	Typography,
+	Zoom,
+} from '@mui/material';
+import { UtensilsCrossed } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import useAuthStore from '../store/authStore';
-import { UtensilsCrossed } from 'lucide-react';
 import api from '../utils/api';
-import {
-	Box,
-	Paper,
-	Stack,
-	Typography,
-	Button,
-	TextField,
-	Avatar,
-	CssBaseline,
-} from '@mui/material';
+import { validarDatosLogin, validarDatosRegister } from '../utils/validadorDatos';
 
 function AuthPage() {
 	const navigate = useNavigate();
+	// Recuperamos la función login del store
 	const login = useAuthStore(state => state.login);
 
-	// Estado VISUAL para el diseño (cambiar entre login y registro)
+	// Estado para alternar entre login y registro
 	const [isLoginView, setIsLoginView] = useState(true);
 
 	// Tus estados lógicos (los mantengo)
 	const [isUpdating, setIsUpdating] = useState(false);
+	const [error, setError] = useState('');
 	const [usuarioLogin, setUsuarioLogin] = useState({ email: '', password_hash: '' });
 	const [usuarioRegister, setUsuarioRegister] = useState({
 		nombre: '',
@@ -153,26 +35,41 @@ function AuthPage() {
 		password_hash: '',
 	});
 
+	const [isCamposValidosLogin, setIsCamposValidosLogin] = useState({
+		email: true,
+		password_hash: true,
+		mensajeEmailError: '',
+		mensajePasswordError: '',
+	});
+
+	const [isCamposValidosRegister, setIsCamposValidosRegister] = useState({
+		nombre: true,
+		email: true,
+		password_hash: true,
+		mensajeNombreError: '',
+		mensajeEmailError: '',
+		mensajePasswordError: '',
+	});
+
+	// useEffect para manejar el login y registro
 	useEffect(() => {
 		async function fetchLogin() {
 			try {
-				const { datos, token } = await api.post('/usuarios/login', usuarioLogin);
+				// Recuperamos los datos del usuario y el token, dependiendo de si estamos en login o registro.
+				const { datos, token } = isLoginView
+					? await api.post('/usuarios/login', usuarioLogin)
+					: await api.post('/usuarios/register', usuarioRegister);
 
-				// 2. Si llega aquí, es que todo fue bien. Guardamos en Zustand.
-				// Asegúrate que tu backend devuelve { token: "...", usuario: {...} }
+				// Guardamos los datos del usuario y el token en local storage (Zustand).
 				login(token, datos);
 
-				// 3. Nos vamos a la zona privada
-				navigate('/');
+				setError('');
 
-				/* setDialogMessage(respuesta.mensaje); // Mensaje
-				setDialogSeverity('success'); // Color verde
-				setOpenDialog(true); // Abrir el diálogo */
+				// Mandamos al usuario a la pantalla principal (Zona Privada).
+				navigate('/');
 			} catch (error) {
 				console.log(error);
-				/* setDialogMessage(error.mensaje || 'Error al crear la donación');
-				setDialogSeverity('error'); // Color rojo
-				setOpenDialog(true); // Abrir el diálogo */
+				setError(error.mensaje || 'Error al iniciar sesión');
 			}
 			// Pase lo que pase hemos terminado el proceso de actualización
 			setIsUpdating(false);
@@ -181,41 +78,50 @@ function AuthPage() {
 		if (isUpdating) fetchLogin();
 	}, [isUpdating]);
 
+	// useEffect para que el Alert desaparezca
+	useEffect(() => {
+		// 5s para que el Alert desaparezca
+		const timer = setTimeout(() => {
+			setError('');
+		}, 5000);
+		return () => clearTimeout(timer);
+	}, [error]);
+
+	// Función para manejar los parámetros del login
 	function handleLogin(e) {
 		setUsuarioLogin({ ...usuarioLogin, [e.target.name]: e.target.value });
 	}
 
-	/*function handleChange(e) {
-        if (e.target.name == "es_primera_vez") {
-            setDonacion({ ...donacion, [e.target.name]: e.target.checked });
-        } else if (e.target.name == "id_campana") {
-            setDonacion({ ...donacion, [e.target.name]: e.target.value });
-            setCampaña(campañas.find(campaña => campaña.id_campana == e.target.value));
-        } else {
-            setDonacion({ ...donacion, [e.target.name]: e.target.value });
-        }
-    } */
+	// Función para manejar los parámetros del registro
+	function handleRegister(e) {
+		setUsuarioRegister({ ...usuarioRegister, [e.target.name]: e.target.value });
+	}
 
-	function handleClickLogin() {
+	// Función para manejar el click en el botón de login o registro
+	function handleClick() {
 		// evitar envíos duplicados por pulsar el botón tras el mensaje de inserción correcta
 		if (isUpdating) return;
 
-		// if (validarDatos()) {
-			setIsUpdating(true);
-		// }
+		if (isLoginView) {
+			const [valido, objetoValidacion] = validarDatosLogin(usuarioLogin);
+			setIsCamposValidosLogin(objetoValidacion);
+			if (valido) {
+				setIsUpdating(true);
+			}
+		} else {
+			const [valido, objetoValidacion] = validarDatosRegister(usuarioRegister);
+			setIsCamposValidosRegister(objetoValidacion);
+			if (valido) {
+				setIsUpdating(true);
+			}
+		}
 	}
-
-	const handleRegister = async e => {
-		e.preventDefault();
-		// ... tu lógica de registro
-	};
 
 	// Estilo reutilizable para los inputs (fondo gris, sin borde, redondeados)
 	const inputStyles = {
 		'& .MuiOutlinedInput-root': {
 			bgcolor: '#f5f6f8',
 			borderRadius: '12px',
-			'& fieldset': { border: 'none' },
 		},
 	};
 
@@ -234,7 +140,7 @@ function AuthPage() {
 		>
 			<CssBaseline />
 
-			<Stack spacing={4} sx={{ maxWidth: 400, mx: 'auto', width: '100%', mt: 4 }}>
+			<Stack spacing={4} sx={{ maxWidth: 400, mx: 'auto', width: '100%', mt: 10 }}>
 				{/* --- SECCIÓN LOGO Y TÍTULO --- */}
 				<Stack alignItems="center" spacing={1}>
 					<Avatar sx={{ bgcolor: '#ff6900', width: 72, height: 72, mb: 1 }}>
@@ -308,15 +214,8 @@ function AuthPage() {
 
 							<Stack spacing={2}>
 								<Box>
-									<Typography
-										variant="caption"
-										fontWeight="bold"
-										sx={{ ml: 1, mb: 0.5, display: 'block' }}
-									>
-										Email
-									</Typography>
 									<TextField
-										label="Email"
+										label="Correo Electronico"
 										id="email"
 										name="email"
 										fullWidth
@@ -326,17 +225,12 @@ function AuthPage() {
 										sx={inputStyles}
 										value={usuarioLogin.email}
 										onChange={handleLogin}
+										error={!isCamposValidosLogin.email}
+										helperText={!isCamposValidosLogin.email && isCamposValidosLogin.mensajeEmailError}
 									/>
 								</Box>
 
 								<Box>
-									<Typography
-										variant="caption"
-										fontWeight="bold"
-										sx={{ ml: 1, mb: 0.5, display: 'block' }}
-									>
-										Contraseña
-									</Typography>
 									<TextField
 										label="Contraseña"
 										id="password_hash"
@@ -348,6 +242,8 @@ function AuthPage() {
 										sx={inputStyles}
 										value={usuarioLogin.password_hash}
 										onChange={handleLogin}
+										error={!isCamposValidosLogin.password_hash}
+										helperText={!isCamposValidosLogin.password_hash && isCamposValidosLogin.mensajePasswordError}
 									/>
 								</Box>
 							</Stack>
@@ -356,7 +252,9 @@ function AuthPage() {
 								type="submit"
 								fullWidth
 								variant="contained"
-								onClick={handleClickLogin}
+								loading={isUpdating}
+								disabled={isUpdating}
+								onClick={handleClick}
 								sx={{
 									bgcolor: '#050505',
 									color: 'white',
@@ -373,90 +271,98 @@ function AuthPage() {
 						</Stack>
 					) : (
 						/* FORMULARIO DE REGISTRO */
-						<form onSubmit={handleRegister}>
-							<Stack spacing={3}>
+						<Stack spacing={3}>
+							<Box>
+								<Typography variant="h6" fontWeight="bold">
+									Crear Cuenta
+								</Typography>
+								<Typography variant="body2" color="text.secondary">
+									Únete para planificar tus comidas
+								</Typography>
+							</Box>
+
+							<Stack spacing={2}>
 								<Box>
-									<Typography variant="h6" fontWeight="bold">
-										Crear Cuenta
-									</Typography>
-									<Typography variant="body2" color="text.secondary">
-										Únete para planificar
-									</Typography>
+									<TextField
+										label="Nombre"
+										id="nombre"
+										name="nombre"
+										fullWidth
+										placeholder="Tu nombre"
+										variant="outlined"
+										sx={inputStyles}
+										value={usuarioRegister.nombre}
+										onChange={handleRegister}
+										error={!isCamposValidosRegister.nombre}
+										helperText={!isCamposValidosRegister.nombre && isCamposValidosRegister.mensajeNombreError}
+									/>
 								</Box>
 
-								<Stack spacing={2}>
-									<Box>
-										<Typography
-											variant="caption"
-											fontWeight="bold"
-											sx={{ ml: 1, mb: 0.5, display: 'block' }}
-										>
-											Nombre
-										</Typography>
-										<TextField
-											fullWidth
-											placeholder="Tu nombre"
-											variant="outlined"
-											sx={inputStyles}
-										/>
-									</Box>
+								<Box>
+									<TextField
+										label="Correo Electronico"
+										id="email"
+										name="email"
+										fullWidth
+										placeholder="tu@email.com"
+										type="email"
+										variant="outlined"
+										sx={inputStyles}
+										value={usuarioRegister.email}
+										onChange={handleRegister}
+										error={!isCamposValidosRegister.email}
+										helperText={!isCamposValidosRegister.email && isCamposValidosRegister.mensajeEmailError}
+									/>
+								</Box>
 
-									<Box>
-										<Typography
-											variant="caption"
-											fontWeight="bold"
-											sx={{ ml: 1, mb: 0.5, display: 'block' }}
-										>
-											Email
-										</Typography>
-										<TextField
-											fullWidth
-											placeholder="tu@email.com"
-											type="email"
-											variant="outlined"
-											sx={inputStyles}
-										/>
-									</Box>
-
-									<Box>
-										<Typography
-											variant="caption"
-											fontWeight="bold"
-											sx={{ ml: 1, mb: 0.5, display: 'block' }}
-										>
-											Contraseña
-										</Typography>
-										<TextField
-											fullWidth
-											placeholder="••••••••"
-											type="password"
-											variant="outlined"
-											sx={inputStyles}
-										/>
-									</Box>
-								</Stack>
-
-								<Button
-									type="submit"
-									fullWidth
-									variant="contained"
-									sx={{
-										bgcolor: '#050505',
-										color: 'white',
-										borderRadius: '50px',
-										py: 1.5,
-										textTransform: 'none',
-										fontWeight: 'bold',
-										fontSize: '1rem',
-										'&:hover': { bgcolor: '#222' },
-									}}
-								>
-									Registrarse
-								</Button>
+								<Box>
+									<TextField
+										label="Contraseña"
+										id="password_hash"
+										name="password_hash"
+										fullWidth
+										placeholder="••••••••"
+										type="password"
+										variant="outlined"
+										sx={inputStyles}
+										value={usuarioRegister.password_hash}
+										onChange={handleRegister}
+										error={!isCamposValidosRegister.password_hash}
+										helperText={!isCamposValidosRegister.password_hash && isCamposValidosRegister.mensajePasswordError}
+									/>
+								</Box>
 							</Stack>
-						</form>
+
+							<Button
+								type="submit"
+								fullWidth
+								variant="contained"
+								loading={isUpdating}
+								disabled={isUpdating}
+								onClick={handleClick}
+								sx={{
+									bgcolor: '#050505',
+									color: 'white',
+									borderRadius: '50px',
+									py: 1.5,
+									textTransform: 'none',
+									fontWeight: 'bold',
+									fontSize: '1rem',
+									'&:hover': { bgcolor: '#222' },
+								}}
+							>
+								Registrarse
+							</Button>
+						</Stack>
 					)}
 				</Paper>
+
+				{/* Mensaje de Error */}
+				<Box sx={{ mt: 2, width: '100%' }}>
+					<Zoom in={error}>
+						<Alert severity="error">{error}</Alert>
+					</Zoom>
+				</Box>
 			</Stack>
 		</Box>
 	);

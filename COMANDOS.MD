@@ -82,3 +82,40 @@ npm install --save html2canvas
 Libreria para crear PDFs en React
 
 npm install @react-pdf/renderer --save
+
+## Capacitor
+
+### Instalar Capacitor
+
+npm i @capacitor/core
+npm i -D @capacitor/cli
+
+### Inicializar Capacitor
+
+npx cap init
+
+### Instalar plugins de Capacitor
+
+npm i @capacitor/android @capacitor/ios
+
+### Crear proyecto de Android e IOS
+
+npx cap add android
+npx cap add ios
+
+### Sincronizar el código web con tu proyecto nativo
+
+npx cap sync
+
+`npx cap sync` Copiará el paquete web creado que se espera encontrar en webDir (dist) de la configuración de capacitor. Instala las dependencias del proyecto nativo.
+
+### Abrir el proyecto de Android e IOS
+
+npx cap open android
+npx cap open ios
+
+### Proceso para probar la app
+
+npm run build
+npx cap sync
+npx cap run android
