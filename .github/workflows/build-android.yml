@@ -31,11 +31,11 @@ jobs:
           java-version: '21'
           distribution: 'zulu'
 
-      - name: Construir el APK con Gradle
-        run: |
-          cd android
-          chmod +x gradlew
-          ./gradlew assembleDebug
+      - name: Subir el APK a GitHub
+        uses: actions/upload-artifact@v4
+        with:
+          name: ProponYCome-App # Esto creará un 'ProponYCome-App.zip'
+          path: android/app/build/outputs/apk/debug/app-debug.apk
 
       - name: Subir el APK a GitHub
         uses: actions/upload-artifact@v4
