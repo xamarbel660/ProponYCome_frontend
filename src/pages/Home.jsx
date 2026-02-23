@@ -121,8 +121,11 @@ function Home() {
 						sx={{
 							bgcolor: '#fff',
 							height: 65,
+							width: '100%',
 							'& .MuiBottomNavigationAction-root': {
 								color: '#8e8e8e', // Gris para los no seleccionados
+								minWidth: 'auto',
+								padding: '6px 4px',
 							},
 							'& .Mui-selected': {
 								color: '#ff6900 !important', // Naranja para el seleccionado
