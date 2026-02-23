@@ -119,3 +119,9 @@ npx cap open ios
 npm run build
 npx cap sync
 npx cap run android
+
+### Generar iconos y splash screens
+
+npm install @capacitor/assets --save-dev
+
+npx capacitor-assets generate

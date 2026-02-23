@@ -12,6 +12,7 @@
   "dependencies": {
     "@capacitor-community/safe-area": "^8.0.1",
     "@capacitor/android": "^8.1.0",
+    "@capacitor/assets": "^3.0.5",
     "@capacitor/cli": "^8.1.0",
     "@capacitor/core": "^8.1.0",
     "@capacitor/status-bar": "^8.0.1",
