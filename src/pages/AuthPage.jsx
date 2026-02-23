@@ -4,6 +4,12 @@ import {
 	Box,
 	Button,
 	CssBaseline,
+	FormControl,
+	FormHelperText,
+	IconButton,
+	InputAdornment,
+	InputLabel,
+	OutlinedInput,
 	Paper,
 	Stack,
 	TextField,
@@ -16,6 +22,8 @@ import { useNavigate } from 'react-router-dom';
 import useAuthStore from '../store/authStore';
 import api from '../utils/api';
 import { validarDatosLogin, validarDatosRegister } from '../utils/validadorDatos';
+import Visibility from '@mui/icons-material/Visibility';
+import VisibilityOff from '@mui/icons-material/VisibilityOff';
 
 function AuthPage() {
 	const navigate = useNavigate();
@@ -125,6 +133,18 @@ function AuthPage() {
 		},
 	};
 
+	const [showPassword, setShowPassword] = useState(false);
+
+	const handleClickShowPassword = () => setShowPassword(show => !show);
+
+	const handleMouseDownPassword = event => {
+		event.preventDefault();
+	};
+
+	const handleMouseUpPassword = event => {
+		event.preventDefault();
+	};
+
 	return (
 		// Contenedor principal para Capacitor (pantalla completa, sin scroll en el body)
 		<Box
@@ -226,25 +246,46 @@ function AuthPage() {
 										value={usuarioLogin.email}
 										onChange={handleLogin}
 										error={!isCamposValidosLogin.email}
-										helperText={!isCamposValidosLogin.email && isCamposValidosLogin.mensajeEmailError}
+										helperText={
+											!isCamposValidosLogin.email && isCamposValidosLogin.mensajeEmailError
+										}
 									/>
 								</Box>
 
 								<Box>
-									<TextField
-										label="Contraseña"
-										id="password_hash"
-										name="password_hash"
-										fullWidth
-										placeholder="••••••••"
-										type="password"
-										variant="outlined"
+									<FormControl
 										sx={inputStyles}
-										value={usuarioLogin.password_hash}
-										onChange={handleLogin}
+										variant="outlined"
+										fullWidth
 										error={!isCamposValidosLogin.password_hash}
-										helperText={!isCamposValidosLogin.password_hash && isCamposValidosLogin.mensajePasswordError}
-									/>
+									>
+										<InputLabel htmlFor="password_hash">Contraseña</InputLabel>
+										<OutlinedInput
+											id="password_hash"
+											name="password_hash"
+											type={showPassword ? 'text' : 'password'}
+											endAdornment={
+												<InputAdornment position="end">
+													<IconButton
+														aria-label={showPassword ? 'hide the password' : 'display the password'}
+														onClick={handleClickShowPassword}
+														onMouseDown={handleMouseDownPassword}
+														onMouseUp={handleMouseUpPassword}
+														edge="end"
+													>
+														{showPassword ? <VisibilityOff /> : <Visibility />}
+													</IconButton>
+												</InputAdornment>
+											}
+											placeholder="••••••••"
+											label="Contraseña"
+											value={usuarioLogin.password_hash}
+											onChange={handleLogin}
+										/>
+										{!isCamposValidosLogin.password_hash && (
+											<FormHelperText>{isCamposValidosLogin.mensajePasswordError}</FormHelperText>
+										)}
+									</FormControl>
 								</Box>
 							</Stack>
 
@@ -294,7 +335,9 @@ function AuthPage() {
 										value={usuarioRegister.nombre}
 										onChange={handleRegister}
 										error={!isCamposValidosRegister.nombre}
-										helperText={!isCamposValidosRegister.nombre && isCamposValidosRegister.mensajeNombreError}
+										helperText={
+											!isCamposValidosRegister.nombre && isCamposValidosRegister.mensajeNombreError
+										}
 									/>
 								</Box>
 
@@ -311,25 +354,48 @@ function AuthPage() {
 										value={usuarioRegister.email}
 										onChange={handleRegister}
 										error={!isCamposValidosRegister.email}
-										helperText={!isCamposValidosRegister.email && isCamposValidosRegister.mensajeEmailError}
+										helperText={
+											!isCamposValidosRegister.email && isCamposValidosRegister.mensajeEmailError
+										}
 									/>
 								</Box>
 
 								<Box>
-									<TextField
-										label="Contraseña"
-										id="password_hash"
-										name="password_hash"
-										fullWidth
-										placeholder="••••••••"
-										type="password"
-										variant="outlined"
+									<FormControl
 										sx={inputStyles}
-										value={usuarioRegister.password_hash}
-										onChange={handleRegister}
+										variant="outlined"
+										fullWidth
 										error={!isCamposValidosRegister.password_hash}
-										helperText={!isCamposValidosRegister.password_hash && isCamposValidosRegister.mensajePasswordError}
-									/>
+									>
+										<InputLabel htmlFor="register_password">Contraseña</InputLabel>
+										<OutlinedInput
+											id="register_password"
+											name="password_hash"
+											type={showPassword ? 'text' : 'password'}
+											endAdornment={
+												<InputAdornment position="end">
+													<IconButton
+														aria-label={showPassword ? 'hide the password' : 'display the password'}
+														onClick={handleClickShowPassword}
+														onMouseDown={handleMouseDownPassword}
+														onMouseUp={handleMouseUpPassword}
+														edge="end"
+													>
+														{showPassword ? <VisibilityOff /> : <Visibility />}
+													</IconButton>
+												</InputAdornment>
+											}
+											placeholder="••••••••"
+											label="Contraseña"
+											value={usuarioRegister.password_hash}
+											onChange={handleRegister}
+										/>
+										{!isCamposValidosRegister.password_hash && (
+											<FormHelperText>
+												{isCamposValidosRegister.mensajePasswordError}
+											</FormHelperText>
+										)}
+									</FormControl>
 								</Box>
 							</Stack>
 

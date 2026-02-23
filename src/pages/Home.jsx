@@ -133,6 +133,9 @@ function Home() {
 									fontSize: '0.75rem', // Evita que el texto crezca al seleccionar
 								},
 							},
+							'& .MuiBottomNavigationAction-root.Mui-selected': {
+								borderTop: '4px solid #ff6900',
+							},
 						}}
 					>
 						<BottomNavigationAction label="Planning" value="/planning" icon={<CalendarDays />} />

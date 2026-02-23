@@ -68,7 +68,7 @@ function validarDatosRegister(usuarioRegister) {
 	}
 
 	// Validación del email como requerido
-	if ((!usuarioRegister.email.length < 10 || usuarioRegister.email.length > 150) && objetoValidacion.email) {
+	if ((usuarioRegister.email.length < 10 || usuarioRegister.email.length > 150) && objetoValidacion.email) {
 		valido = false;
 		objetoValidacion.email = false;
 		objetoValidacion.mensajeEmailError = 'El email debe tener al menos 10 caracteres';
