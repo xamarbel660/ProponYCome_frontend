@@ -125,3 +125,21 @@ npx cap run android
 npm install @capacitor/assets --save-dev
 
 npx capacitor-assets generate
+
+### Para ver la aplicacion en el dispositivo movil
+
+#### En la configuración de capacitor.config.json
+
+"server": {
+    "url": "http://[IP_ADDRESS]",
+    "cleartext": true,
+    "androidScheme": "http"
+  },
+
+#### En la terminal
+
+npm run dev -- --host
+
+#### En otro terminal
+
+npx cap run android

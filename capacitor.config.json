@@ -3,6 +3,8 @@
   "appName": "Propon&Come",
   "webDir": "dist",
   "server": {
+    "_comment": "URL de desarrollo, borrar antes de publicar",
+    "url": "http://192.168.1.136:5173",
     "cleartext": true,
     "androidScheme": "http"
   },

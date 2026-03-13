@@ -8,6 +8,7 @@ import {
 	CssBaseline,
 	IconButton,
 	Paper,
+	Stack,
 	Toolbar,
 	Typography,
 } from '@mui/material';
@@ -18,13 +19,14 @@ import {
 	ShoppingCart,
 	Sparkles,
 	Users,
-	UtensilsCrossed
+	UtensilsCrossed,
 } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { Outlet, useLocation, useNavigate } from 'react-router';
 import useAuthStore from '../store/authStore';
 
 function Home() {
+	const user = useAuthStore(state => state.user); // Leemos el usuario
 	const logout = useAuthStore(state => state.logout); // Leemos el logout
 
 	const navigate = useNavigate();
@@ -78,10 +80,19 @@ function Home() {
 						>
 							<UtensilsCrossed color="#fff" size={28} />
 						</Avatar>
-						<Typography sx={{ color: '#ff6900' }} variant="h6">
-							Propón & Come
-						</Typography>
-						<IconButton onClick={logout} aria-label="Cerrar Sesión">
+						<Stack>
+							<Typography sx={{ color: '#ff6900' }} variant="h6">
+								Propón & Come
+							</Typography>
+							<Typography sx={{ color: '#7c7c7cff' }} variant="subtitle2">
+								Bienvenido/a {user?.nombre}
+							</Typography>
+						</Stack>
+						<IconButton
+							onClick={logout}
+							aria-label="Cerrar Sesión"
+							sx={{ position: 'absolute', right: 16 }}
+						>
 							<LogOut />
 						</IconButton>
 					</Toolbar>
