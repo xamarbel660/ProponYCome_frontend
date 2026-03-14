@@ -10,6 +10,7 @@ import {
 	Stack,
 	Typography,
 	Zoom,
+	Pagination,
 } from '@mui/material';
 import { ChartNoAxesColumnIncreasing, Plus, SquarePen, Trash2, Eye } from 'lucide-react';
 import { useEffect, useState } from 'react';
@@ -21,6 +22,9 @@ import DialogoVerReceta from '../components/DialogoVerReceta';
 function Recetas() {
 	// Recupera las recetas del usuario
 	const [recetasRecuperadas, setRecetasRecuperadas] = useState([]);
+	// Paginación
+	const [paginaActual, setPaginaActual] = useState(1);
+	const [totalPaginas, setTotalPaginas] = useState(1);
 	// Recuperamos todos los ingredientes disponibles para el autocomplete
 	const [ingredientesRecuperados, setIngredientesRecuperados] = useState([]);
 	// Estado para abrir y cerrar el dialog de Nueva/Editar Receta
@@ -86,11 +90,12 @@ function Recetas() {
 			try {
 				// Ejecutamos ambas peticiones a la vez (en paralelo)
 				const [resRecetas, resIngredientes] = await Promise.all([
-					api.post('/recetas'),
+					api.post('/recetas/paginadas', { page: paginaActual }),
 					api.post('/ingredientes'),
 				]);
 
 				setRecetasRecuperadas(resRecetas.datos.recetas || []);
+				setTotalPaginas(Math.ceil((resRecetas.datos.total || 0) / 5) || 1);
 				setIngredientesRecuperados(resIngredientes.datos.ingredientes || []);
 			} catch (error) {
 				console.log(error);
@@ -100,7 +105,7 @@ function Recetas() {
 		}
 
 		cargarDatosPreliminares();
-	}, [recargarDatos]);
+	}, [recargarDatos, paginaActual]);
 
 	async function handleDelete() {
 		setIsUpdating(true); // Bloqueamos los botones al iniciar
@@ -143,10 +148,11 @@ function Recetas() {
 			<Box
 				sx={{
 					p: 2,
+					pb: { xs: 4, sm: 2 } // Reducimos el padding inferior en móvil porque 12 era demasiado
 				}}
 			>
 				<Stack spacing={2}>
-					<Box sx={{ height: '1000px' }}>
+					<Box sx={{ minHeight: '100vh' }}>
 						{/* Titulo, subtitulo y boton de crear nueva receta*/}
 						<Stack sx={{ mb: 4 }}>
 							<Typography variant="h5"> Mi Cuaderno de Recetas</Typography>
@@ -274,6 +280,34 @@ function Recetas() {
 								</Grid>
 							))}
 						</Grid>
+
+						{/* Paginación */}
+						{totalPaginas > 1 && (
+							<Box sx={{ display: 'flex', justifyContent: 'center', mt: 4 }}>
+								<Pagination
+									count={totalPaginas}
+									page={paginaActual}
+									onChange={(event, value) => setPaginaActual(value)}
+									size="large"
+									sx={{
+										'& .MuiPaginationItem-root.Mui-selected': {
+											backgroundColor: '#ff6900',
+											color: 'white',
+										},
+										'& .MuiPaginationItem-root.Mui-selected:hover': {
+											backgroundColor: '#e65e00',
+										},
+										// Solo aplicamos el hover en dispositivos con ratón (evita que se quede pegado en móviles)
+										'@media (hover: hover)': {
+											'& .MuiPaginationItem-root:hover': {
+												backgroundColor: '#ff6900',
+												color: 'white',
+											}
+										}
+									}}
+								/>
+							</Box>
+						)}
 
 						{/* Dialogo Reutilizable para Crear/Editar Recetas */}
 						<DialogoReceta
