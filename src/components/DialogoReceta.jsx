@@ -214,7 +214,7 @@ function DialogoReceta({ modo, idReceta, open, onClose, onSuccess, ingredientesR
 		// Validación de la Cantidad de los ingredientes
 		ingredientes.forEach((ing, index) => {
 			if (ing.nombre_ingrediente && (!ing.cantidad || ing.cantidad <= 0)) {
-				nuevosErrores[`cantidad_${index}`] = 'Requerido'; // Ejemplo para campo específico
+				nuevosErrores[`cantidad_${index}`] = 'Requerido';
 			}
 		});
 		setErrores(nuevosErrores);

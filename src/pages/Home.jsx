@@ -21,7 +21,7 @@ import {
 	Users,
 	UtensilsCrossed,
 } from 'lucide-react';
-import { useEffect, useState } from 'react';
+import { useEffect } from 'react';
 import { Outlet, useLocation, useNavigate } from 'react-router';
 import useAuthStore from '../store/authStore';
 
@@ -32,20 +32,22 @@ function Home() {
 	const navigate = useNavigate();
 	const location = useLocation(); // Para saber en qué pestaña estamos
 
-	// Estados para los márgenes seguros (Arriba y Abajo)
-	const [topPadding, setTopPadding] = useState(30);
-
+	// Configurar variables CSS nativas para safe areas
 	useEffect(() => {
-		const leerBarrasDeEstado = async () => {
+		const configurarSafeAreas = async () => {
 			try {
 				const info = await SafeArea.getSafeAreaInsets();
-				// Guardamos el margen de arriba
-				setTopPadding(info.insets.top > 0 ? info.insets.top : 30);
+				// Establecer variables CSS nativas para usar en todo el proyecto
+				document.documentElement.style.setProperty('--safe-area-inset-top', `${info.insets.top}px`);
+				document.documentElement.style.setProperty('--safe-area-inset-bottom', `${info.insets.bottom}px`);
 			} catch (error) {
-				console.log('Error leyendo safe area', error);
+				console.log('Error leyendo safe areas:', error);
+				// Fallback a valores por defecto (más conservador para botones de navegación Android)
+				document.documentElement.style.setProperty('--safe-area-inset-top', '20px');
+				document.documentElement.style.setProperty('--safe-area-inset-bottom', '45px');
 			}
 		};
-		leerBarrasDeEstado();
+		configurarSafeAreas();
 	}, []);
 
 	// Función para cambiar de ruta con los botones de abajo
@@ -72,7 +74,7 @@ function Home() {
 					<Toolbar
 						sx={{
 							bgcolor: '#fff',
-							pt: `${topPadding}px`,
+							pt: 'var(--safe-area-inset-top, 20px)',
 						}}
 					>
 						<Avatar
@@ -119,8 +121,8 @@ function Home() {
 				<Paper
 					elevation={8}
 					sx={{
-						// MAGIA AQUÍ: Usamos la variable nativa de Capacitor 8 para esquivar los 3 botones
-						pb: 'calc(var(--safe-area-inset-bottom, env(safe-area-inset-bottom, 0px)) + 5px)',
+						// Usamos variables CSS nativas para esquivar barras de sistema
+						pb: 'calc(var(--safe-area-inset-bottom, 0px) + 5px)',
 						bgcolor: '#fff',
 						borderTop: '1px solid #eee',
 					}}

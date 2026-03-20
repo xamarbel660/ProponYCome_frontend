@@ -1,7 +1,16 @@
 import { Box, Button, Dialog, DialogActions, Typography } from '@mui/material';
 import { Trash2, X } from 'lucide-react';
 
-function DialogoConfirmacion({ open, onClose, onConfirm, titulo, mensaje, isProcessing }) {
+function DialogoConfirmacion({
+	open,
+	onClose,
+	onConfirm,
+	titulo,
+	mensaje,
+	isProcessing,
+	confirmText = 'Borrar',
+	cancelText = 'Cancelar',
+}) {
 	return (
 		<Dialog open={open} onClose={onClose} maxWidth="xs" fullWidth>
 			<Box sx={{ p: 2, textAlign: 'center' }}>
@@ -29,7 +38,7 @@ function DialogoConfirmacion({ open, onClose, onConfirm, titulo, mensaje, isProc
 						'&:hover': { bgcolor: '#e73333ff' },
 					}}
 				>
-					Borrar
+					{confirmText}
 				</Button>
 				<Button
 					startIcon={<X />}
@@ -47,7 +56,7 @@ function DialogoConfirmacion({ open, onClose, onConfirm, titulo, mensaje, isProc
 						'&:hover': { bgcolor: '#338f38ff' },
 					}}
 				>
-					Cancelar
+					{cancelText}
 				</Button>
 			</DialogActions>
 		</Dialog>
