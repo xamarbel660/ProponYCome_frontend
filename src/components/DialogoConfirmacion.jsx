@@ -29,13 +29,13 @@ function DialogoConfirmacion({
 					variant="contained"
 					disabled={isProcessing}
 					sx={{
-						bgcolor: '#d32f2f',
-						color: 'white',
+						bgcolor: 'error.main',
+						color: 'error.contrastText',
 						py: 1.5,
 						borderRadius: '8px',
 						fontWeight: 'bold',
 						textTransform: 'none',
-						'&:hover': { bgcolor: '#e73333ff' },
+						'&:hover': { bgcolor: 'error.dark' },
 					}}
 				>
 					{confirmText}
@@ -47,13 +47,13 @@ function DialogoConfirmacion({
 					variant="contained"
 					disabled={isProcessing}
 					sx={{
-						bgcolor: '#2e7d32',
-						color: 'white',
+						bgcolor: 'success.main',
+						color: 'success.contrastText',
 						py: 1.5,
 						borderRadius: '8px',
 						fontWeight: 'bold',
 						textTransform: 'none',
-						'&:hover': { bgcolor: '#338f38ff' },
+						'&:hover': { bgcolor: 'success.dark' },
 					}}
 				>
 					{cancelText}

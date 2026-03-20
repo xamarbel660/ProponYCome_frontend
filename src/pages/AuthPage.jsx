@@ -128,7 +128,7 @@ function AuthPage() {
 	// Estilo reutilizable para los inputs (fondo gris, sin borde, redondeados)
 	const inputStyles = {
 		'& .MuiOutlinedInput-root': {
-			bgcolor: '#f5f6f8',
+			bgcolor: 'action.hover',
 			borderRadius: '12px',
 		},
 	};
@@ -153,7 +153,7 @@ function AuthPage() {
 				flexDirection: 'column',
 				minHeight: '100vh',
 				width: '100vw',
-				bgcolor: '#fff7ed', // El color crema de fondo
+				bgcolor: 'background.default',
 				overflow: 'auto', // Permite scroll si la pantalla es muy pequeña
 				p: 2,
 			}}
@@ -178,7 +178,7 @@ function AuthPage() {
 				<Box
 					sx={{
 						display: 'flex',
-						bgcolor: '#eef0f3', // Gris clarito para el fondo del "pill"
+						bgcolor: 'action.hover',
 						borderRadius: '50px',
 						p: 0.5,
 					}}
@@ -191,9 +191,9 @@ function AuthPage() {
 							textTransform: 'none',
 							fontWeight: isLoginView ? 'bold' : 'normal',
 							color: isLoginView ? 'text.primary' : 'text.secondary',
-							bgcolor: isLoginView ? 'white' : 'transparent',
+								bgcolor: isLoginView ? 'background.paper' : 'transparent',
 							boxShadow: isLoginView ? 1 : 0,
-							'&:hover': { bgcolor: isLoginView ? 'white' : 'transparent' },
+								'&:hover': { bgcolor: isLoginView ? 'background.paper' : 'transparent' },
 						}}
 					>
 						Iniciar Sesión
@@ -206,9 +206,9 @@ function AuthPage() {
 							textTransform: 'none',
 							fontWeight: !isLoginView ? 'bold' : 'normal',
 							color: !isLoginView ? 'text.primary' : 'text.secondary',
-							bgcolor: !isLoginView ? 'white' : 'transparent',
+								bgcolor: !isLoginView ? 'background.paper' : 'transparent',
 							boxShadow: !isLoginView ? 1 : 0,
-							'&:hover': { bgcolor: !isLoginView ? 'white' : 'transparent' },
+								'&:hover': { bgcolor: !isLoginView ? 'background.paper' : 'transparent' },
 						}}
 					>
 						Registrarse
@@ -218,7 +218,7 @@ function AuthPage() {
 				{/* --- SECCIÓN FORMULARIO (TARJETA BLANCA) --- */}
 				<Paper
 					elevation={0}
-					sx={{ p: 3, borderRadius: 4, boxShadow: '0px 4px 20px rgba(0,0,0,0.05)' }}
+					sx={{ p: 3, borderRadius: 4, boxShadow: '0px 4px 20px rgba(0,0,0,0.15)' }}
 				>
 					{isLoginView ? (
 						/* FORMULARIO DE LOGIN */
@@ -297,14 +297,14 @@ function AuthPage() {
 								disabled={isUpdating}
 								onClick={handleClick}
 								sx={{
-									bgcolor: '#050505',
-									color: 'white',
+									bgcolor: 'primary.main',
+									color: 'primary.contrastText',
 									borderRadius: '50px',
 									py: 1.5,
 									textTransform: 'none',
 									fontWeight: 'bold',
 									fontSize: '1rem',
-									'&:hover': { bgcolor: '#222' },
+									'&:hover': { bgcolor: 'primary.dark' },
 								}}
 							>
 								Ingresar
@@ -407,14 +407,14 @@ function AuthPage() {
 								disabled={isUpdating}
 								onClick={handleClick}
 								sx={{
-									bgcolor: '#050505',
-									color: 'white',
+									bgcolor: 'primary.main',
+									color: 'primary.contrastText',
 									borderRadius: '50px',
 									py: 1.5,
 									textTransform: 'none',
 									fontWeight: 'bold',
 									fontSize: '1rem',
-									'&:hover': { bgcolor: '#222' },
+									'&:hover': { bgcolor: 'primary.dark' },
 								}}
 							>
 								Registrarse

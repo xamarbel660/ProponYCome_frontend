@@ -148,7 +148,7 @@ function Recetas() {
 			<Box
 				sx={{
 					p: 2,
-					pb: { xs: 4, sm: 2 } // Reducimos el padding inferior en móvil porque 12 era demasiado
+					pb: { xs: 4, sm: 2 }, // Reducimos el padding inferior en móvil porque 12 era demasiado
 				}}
 			>
 				<Stack spacing={2}>
@@ -156,14 +156,19 @@ function Recetas() {
 						{/* Titulo, subtitulo y boton de crear nueva receta*/}
 						<Stack sx={{ mb: 4 }}>
 							<Typography variant="h5"> Mi Cuaderno de Recetas</Typography>
-							<Typography variant="subtitle2" color="#7c7c7cff">
+							<Typography variant="subtitle2" color="text.secondary">
 								Guarda y organiza tus recetas favoritas
 							</Typography>
 							<Button
 								onClick={() => handleClickOpenDialog('Nueva')}
 								variant="contained"
 								startIcon={<Plus />}
-								sx={{ color: '#fff', backgroundColor: '#ff6900', mt: 2, borderRadius: 2 }}
+								sx={{
+									color: 'primary.contrastText',
+									backgroundColor: 'primary.main',
+									mt: 2,
+									borderRadius: 2,
+								}}
 							>
 								Nueva Receta
 							</Button>
@@ -234,7 +239,7 @@ function Recetas() {
 													</Typography>
 												</Box>
 											</Box>
-											{/* Botones de editar y borrar */}
+											{/* Botones de ver, editar y borrar */}
 											<Box sx={{ display: 'flex', gap: 1 }}>
 												<IconButton
 													aria-label="Ver Receta"
@@ -242,6 +247,7 @@ function Recetas() {
 													sx={{
 														border: '1px solid',
 														borderRadius: 2,
+														borderColor: 'divider',
 														width: 34,
 														height: 34,
 													}}
@@ -254,9 +260,9 @@ function Recetas() {
 													size="small"
 													onClick={() => handleClickOpenDialog('Editar', row.id_receta)}
 													sx={{
-														color: 'black',
+														color: 'text.primary',
 														borderRadius: 2,
-														borderColor: '#7c7c7cff',
+														borderColor: 'divider',
 														flexGrow: 1,
 													}}
 												>
@@ -266,13 +272,14 @@ function Recetas() {
 													aria-label="Borrar Receta"
 													onClick={() => handleClickOpenDialog('Eliminar', row.id_receta)}
 													sx={{
-														border: '1px solid #7c7c7cff',
+														border: theme => `1px solid ${theme.palette.divider}`,
+														color: 'error.main',
 														borderRadius: 2,
 														width: 34,
 														height: 34,
 													}}
 												>
-													<Trash2 color="red" size={18} />
+													<Trash2 color="currentColor" size={18} />
 												</IconButton>
 											</Box>
 										</CardContent>
@@ -292,7 +299,7 @@ function Recetas() {
 									sx={{
 										'& .MuiPaginationItem-root.Mui-selected': {
 											backgroundColor: '#ff6900',
-											color: 'white',
+											color: 'primary.contrastText',
 										},
 										'& .MuiPaginationItem-root.Mui-selected:hover': {
 											backgroundColor: '#e65e00',
@@ -301,9 +308,9 @@ function Recetas() {
 										'@media (hover: hover)': {
 											'& .MuiPaginationItem-root:hover': {
 												backgroundColor: '#ff6900',
-												color: 'white',
-											}
-										}
+												color: 'primary.contrastText',
+											},
+										},
 									}}
 								/>
 							</Box>

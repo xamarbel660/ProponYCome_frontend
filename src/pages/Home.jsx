@@ -20,17 +20,19 @@ import {
 	Sparkles,
 	Users,
 	UtensilsCrossed,
+	Bolt
 } from 'lucide-react';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { Outlet, useLocation, useNavigate } from 'react-router';
 import useAuthStore from '../store/authStore';
+import Configuracion from '../components/Configuracion';
 
 function Home() {
 	const user = useAuthStore(state => state.user); // Leemos el usuario
-	const logout = useAuthStore(state => state.logout); // Leemos el logout
 
 	const navigate = useNavigate();
 	const location = useLocation(); // Para saber en qué pestaña estamos
+	const [openConfiguracion, setOpenConfiguracion] = useState(false);
 
 	// Configurar variables CSS nativas para safe areas
 	useEffect(() => {
@@ -73,7 +75,7 @@ function Home() {
 				<AppBar position="static" elevation={0}>
 					<Toolbar
 						sx={{
-							bgcolor: '#fff',
+							bgcolor: 'background.paper',
 							pt: 'var(--safe-area-inset-top, 20px)',
 						}}
 					>
@@ -91,11 +93,11 @@ function Home() {
 							</Typography>
 						</Stack>
 						<IconButton
-							onClick={logout}
-							aria-label="Cerrar Sesión"
+							onClick={() => setOpenConfiguracion(true)}
+							aria-label="Configuración"
 							sx={{ position: 'absolute', right: 16 }}
 						>
-							<LogOut />
+							<Bolt color='currentColor' size={30} />
 						</IconButton>
 					</Toolbar>
 				</AppBar>
@@ -110,7 +112,6 @@ function Home() {
 						overflow: 'auto',
 						bgcolor: 'background.default',
 						position: 'relative', // Necesario para posicionamiento absoluto interno si lo usas
-						backgroundColor: '#fff7ed',
 					}}
 				>
 					{/* Aquí se renderizarán tus páginas hijas */}
@@ -123,8 +124,8 @@ function Home() {
 					sx={{
 						// Usamos variables CSS nativas para esquivar barras de sistema
 						pb: 'calc(var(--safe-area-inset-bottom, 0px) + 5px)',
-						bgcolor: '#fff',
-						borderTop: '1px solid #eee',
+						bgcolor: 'background.paper',
+						borderTop: theme => `1px solid ${theme.palette.divider}`,
 					}}
 				>
 					<BottomNavigation
@@ -132,11 +133,11 @@ function Home() {
 						value={location.pathname} // Marca como activo el botón de la URL actual
 						onChange={handleNavegacion}
 						sx={{
-							bgcolor: '#fff',
+							bgcolor: 'background.paper',
 							height: 65,
 							width: '100%',
 							'& .MuiBottomNavigationAction-root': {
-								color: '#8e8e8e', // Gris para los no seleccionados
+								color: 'text.secondary',
 								minWidth: 'auto',
 								padding: '6px 4px',
 							},
@@ -150,7 +151,7 @@ function Home() {
 								},
 							},
 							'& .MuiBottomNavigationAction-root.Mui-selected': {
-								borderTop: '4px solid #ff6900',
+								borderTop: theme => `4px solid ${theme.palette.primary.main}`,
 							},
 						}}
 					>
@@ -162,6 +163,9 @@ function Home() {
 					</BottomNavigation>
 				</Paper>
 			</Box>
+
+			{/* Dialogo de configuración */}
+			<Configuracion open={openConfiguracion} onClose={() => setOpenConfiguracion(false)} />
 		</>
 	);
 }

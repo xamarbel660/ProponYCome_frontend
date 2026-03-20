@@ -183,14 +183,14 @@ function Familias() {
 						{/* Titulo, subtitulo y boton de crear nueva receta*/}
 						<Stack sx={{ mb: 4 }}>
 							<Typography variant="h5"> Mis Familias</Typography>
-							<Typography variant="subtitle2" color="#7c7c7cff">
+							<Typography variant="subtitle2" color="text.secondary">
 								Gestiona tus grupos de planificación
 							</Typography>
 							<Button
 								onClick={() => { handleClickOpenDialog('Nueva') }}
 								variant="contained"
 								startIcon={<Plus />}
-								sx={{ color: '#fff', backgroundColor: '#ff6900', mt: 2, borderRadius: 2 }}
+								sx={{ color: 'primary.contrastText', backgroundColor: 'primary.main', mt: 2, borderRadius: 2 }}
 							>
 								Crear Familia
 							</Button>
@@ -198,7 +198,7 @@ function Familias() {
 								onClick={() => { handleClickOpenDialog('Unirme') }}
 								variant="contained"
 								startIcon={<UserPlus />}
-								sx={{ color: '#000000', backgroundColor: '#ffffff', mt: 2, borderRadius: 2 }}
+								sx={{ color: 'text.primary', backgroundColor: 'background.paper', mt: 2, borderRadius: 2 }}
 							>
 								Unirme a una Familia
 							</Button>
@@ -275,9 +275,9 @@ function Familias() {
 														fullWidth
 														onClick={() => handleClickOpenDialog('Ver', row)}
 														sx={{
-															color: 'black',
+															color: 'text.primary',
 															borderRadius: 2,
-															borderColor: '#7c7c7cff',
+															borderColor: 'divider',
 															flexGrow: 1,
 														}}
 													>
@@ -290,9 +290,9 @@ function Familias() {
 														fullWidth
 														onClick={() => handleClickOpenDialog('Invitación', row)}
 														sx={{
-															color: 'black',
+															color: 'text.primary',
 															borderRadius: 2,
-															borderColor: '#7c7c7cff',
+															borderColor: 'divider',
 															flexGrow: 1,
 														}}
 													>
@@ -306,9 +306,9 @@ function Familias() {
 													fullWidth
 													onClick={() => handleClickOpenDialog('Eliminar', row)}
 													sx={{
-														color: 'red',
+														color: 'error.main',
 														borderRadius: 2,
-														borderColor: '#7c7c7cff',
+														borderColor: 'divider',
 													}}
 												>
 													{row.es_admin ? 'Eliminar Familia' : 'Salir de la Familia'}
@@ -331,7 +331,7 @@ function Familias() {
 									sx={{
 										'& .MuiPaginationItem-root.Mui-selected': {
 											backgroundColor: '#ff6900',
-											color: 'white',
+											color: 'primary.contrastText',
 										},
 										'& .MuiPaginationItem-root.Mui-selected:hover': {
 											backgroundColor: '#e65e00',
@@ -340,7 +340,7 @@ function Familias() {
 										'@media (hover: hover)': {
 											'& .MuiPaginationItem-root:hover': {
 												backgroundColor: '#ff6900',
-												color: 'white',
+												color: 'primary.contrastText',
 											}
 										}
 									}}

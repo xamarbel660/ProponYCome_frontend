@@ -111,7 +111,7 @@ function DialogoVerMiembros({ open, onClose, idFamilia }) {
                     )}
 
                     {(familia?.usuarios || []).map(usuario => (
-                        <Box key={usuario.id_usuario} sx={{ mb: 2, p: 2, bgcolor: '#f5f6f8', borderRadius: 2 }}>
+                        <Box key={usuario.id_usuario} sx={{ mb: 2, p: 2, bgcolor: 'action.hover', borderRadius: 2 }}>
                             <Typography variant="subtitle1" sx={{ fontWeight: 'bold' }}>
                                 {usuario.nombre_usuario}{' '}
                                 {usuario.es_administrador ? (
@@ -124,7 +124,7 @@ function DialogoVerMiembros({ open, onClose, idFamilia }) {
                             {familia?.admin && !usuario.es_actual && (
                                 <Box sx={{ mt: 1, display: 'flex', gap: 1, flexWrap: 'wrap' }}>
                                     <Button
-                                        sx={{color: 'black', borderColor: 'black'}}
+                                        sx={{ color: 'text.primary', borderColor: 'divider' }}
                                         startIcon={usuario.es_administrador ? <ShieldOff size={14} /> : <Shield size={14} />}
                                         variant="outlined"
                                         size="small"

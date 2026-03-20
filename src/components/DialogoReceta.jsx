@@ -134,7 +134,7 @@ function DialogoReceta({ modo, idReceta, open, onClose, onSuccess, ingredientesR
 	// Estilos de los TextField
 	const inputStyles = {
 		'& .MuiOutlinedInput-root': {
-			bgcolor: '#f5f6f8',
+			bgcolor: 'action.hover',
 			borderRadius: '12px',
 		},
 		mb: 2,
@@ -144,22 +144,22 @@ function DialogoReceta({ modo, idReceta, open, onClose, onSuccess, ingredientesR
 	const getButtonStyle = (value, color) => {
 		const isSelected = recetaActual.dificultad === value;
 		return {
-			color: isSelected ? 'white' : 'black',
+			color: isSelected ? 'common.white' : 'text.primary',
 			flexGrow: 1,
 			textTransform: 'none',
 			borderRadius: '8px',
 			transition: 'all 0.2s',
-			borderColor: isSelected ? color : '#e0e0e0',
+			borderColor: isSelected ? color : 'divider',
 			bgcolor: isSelected ? `${color}` : 'transparent',
 			zIndex: isSelected ? 1 : 0,
 			'&:hover': {
-				color: 'white',
+				color: 'common.white',
 				borderColor: color,
 				bgcolor: `${color}`,
 				zIndex: 2,
 			},
 			'&.MuiButtonGroup-grouped': {
-				borderColor: isSelected ? color : '#e0e0e0',
+				borderColor: isSelected ? color : 'divider',
 				'&:hover': {
 					borderColor: `${color} !important`,
 					zIndex: 2,
@@ -329,9 +329,9 @@ function DialogoReceta({ modo, idReceta, open, onClose, onSuccess, ingredientesR
 						sx={{
 							mb: 2,
 							p: 1.5,
-							border: '1px solid #e0e0e0',
+							border: theme => `1px solid ${theme.palette.divider}`,
 							borderRadius: '8px',
-							bgcolor: '#fafafa', // Un fondo gris súper clarito
+							bgcolor: 'action.hover',
 						}}
 					>
 						{/* Nombre del Ingrediente */}
@@ -405,15 +405,15 @@ function DialogoReceta({ modo, idReceta, open, onClose, onSuccess, ingredientesR
 					onClick={handleAñadirIngrediente}
 					variant="contained"
 					sx={{
-						bgcolor: '#ff6900',
-						color: 'white',
+						bgcolor: 'primary.main',
+						color: 'primary.contrastText',
 						py: 1.5, // Le da un poco más de altura para que sea más fácil de tocar en móvil
 						borderRadius: '8px', // Bordes un poco redondeados
 						fontSize: '1rem',
 						fontWeight: 'bold',
 						textTransform: 'none', // Para que no ponga todo el texto en mayúsculas
 						'&:hover': {
-							bgcolor: '#e65c00', // Un naranja un pelín más oscuro al pasar el ratón o pulsar
+							bgcolor: 'primary.dark', // Un naranja un pelín más oscuro al pasar el ratón o pulsar
 						},
 					}}
 				>
@@ -429,15 +429,15 @@ function DialogoReceta({ modo, idReceta, open, onClose, onSuccess, ingredientesR
 					variant="contained"
 					disabled={isUpdating}
 					sx={{
-						bgcolor: '#ff6900',
-						color: 'white',
+						bgcolor: 'primary.main',
+						color: 'primary.contrastText',
 						py: 1.5, // Le da un poco más de altura para que sea más fácil de tocar en móvil
 						borderRadius: '8px', // Bordes un poco redondeados
 						fontSize: '1rem',
 						fontWeight: 'bold',
 						textTransform: 'none', // Para que no ponga todo el texto en mayúsculas
 						'&:hover': {
-							bgcolor: '#e65c00', // Un naranja un pelín más oscuro al pasar el ratón o pulsar
+							bgcolor: 'primary.dark', // Un naranja un pelín más oscuro al pasar el ratón o pulsar
 						},
 					}}
 				>

@@ -60,7 +60,7 @@ function DialogoFamilia({ modo, open, onClose, onSuccess }) {
     // Estilos de los TextField
     const inputStyles = {
         '& .MuiOutlinedInput-root': {
-            bgcolor: '#f5f6f8',
+            bgcolor: 'action.hover',
             borderRadius: '12px',
         },
     };
@@ -151,15 +151,15 @@ function DialogoFamilia({ modo, open, onClose, onSuccess }) {
                         variant="contained"
                         disabled={isUpdating}
                         sx={{
-                            bgcolor: '#ff6900',
-                            color: 'white',
+                            bgcolor: 'primary.main',
+                            color: 'primary.contrastText',
                             py: 1.5, // Le da un poco más de altura para que sea más fácil de tocar en móvil
                             borderRadius: '8px', // Bordes un poco redondeados
                             fontSize: '1rem',
                             fontWeight: 'bold',
                             textTransform: 'none', // Para que no ponga todo el texto en mayúsculas
                             '&:hover': {
-                                bgcolor: '#e65c00', // Un naranja un pelín más oscuro al pasar el ratón o pulsar
+                                bgcolor: 'primary.dark', // Un naranja un pelín más oscuro al pasar el ratón o pulsar
                             },
                         }}
                     >

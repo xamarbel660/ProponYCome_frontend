@@ -57,7 +57,7 @@ function DialogoCodigoInvitacion({ open, onClose, esAdmin, nombreFamilia, codigo
     // Estilos de los TextField
     const inputStyles = {
         '& .MuiOutlinedInput-root': {
-            bgcolor: '#f5f6f8',
+            bgcolor: 'action.hover',
             borderRadius: '12px',
         },
     };
@@ -131,7 +131,7 @@ function DialogoCodigoInvitacion({ open, onClose, esAdmin, nombreFamilia, codigo
                             variant="contained"
                             sx={{
                                 bgcolor: generado ? '#4caf50' : '#9817fa',
-                                color: 'white',
+                                color: 'common.white',
                                 py: 1.5,
                                 borderRadius: '8px',
                                 fontSize: '1rem',
@@ -155,7 +155,7 @@ function DialogoCodigoInvitacion({ open, onClose, esAdmin, nombreFamilia, codigo
                         variant="contained"
                         sx={{
                             bgcolor: copiado ? '#4caf50' : '#ff6900',
-                            color: 'white',
+                            color: 'common.white',
                             py: 1.5,
                             borderRadius: '8px',
                             fontSize: '1rem',

@@ -60,13 +60,13 @@ function DialogoVerReceta({ idReceta, open, onClose }) {
 
 			{cargando || !receta ? (
 				<Box sx={{ display: 'flex', justifyContent: 'center', p: 5 }}>
-					<CircularProgress sx={{ color: '#ff6900' }} />
+					<CircularProgress sx={{ color: 'primary.main' }} />
 				</Box>
 			) : (
 				<>
 					{/* Cabecera de la receta */}
-					<Box sx={{ p: 4, pb: 2, textAlign: 'center', bgcolor: '#fffbf5' }}>
-						<Typography variant="h4" sx={{ fontWeight: 'bold', mb: 2, color: '#333' }}>
+					<Box sx={{ p: 4, pb: 2, textAlign: 'center', bgcolor: 'action.hover' }}>
+						<Typography variant="h4" sx={{ fontWeight: 'bold', mb: 2, color: 'text.primary' }}>
 							{receta.titulo}
 						</Typography>
 
@@ -92,7 +92,7 @@ function DialogoVerReceta({ idReceta, open, onClose }) {
 					<DialogContent sx={{ p: 4 }}>
 						{/* Sección de Descripción */}
 						<Box sx={{ mb: 4 }}>
-							<Typography variant="h6" sx={{ fontWeight: 'bold', mb: 1, color: '#ff6900' }}>
+							<Typography variant="h6" sx={{ fontWeight: 'bold', mb: 1, color: 'primary.main' }}>
 								Descripción
 							</Typography>
 							<Typography variant="body1" sx={{ color: 'text.secondary', whiteSpace: 'pre-line' }}>
@@ -102,7 +102,7 @@ function DialogoVerReceta({ idReceta, open, onClose }) {
 
 						{/* Sección de Ingredientes */}
 						<Box>
-							<Typography variant="h6" sx={{ fontWeight: 'bold', mb: 2, color: '#ff6900' }}>
+							<Typography variant="h6" sx={{ fontWeight: 'bold', mb: 2, color: 'primary.main' }}>
 								Ingredientes
 							</Typography>
 
@@ -114,7 +114,7 @@ function DialogoVerReceta({ idReceta, open, onClose }) {
 											display: 'flex',
 											justifyContent: 'space-between',
 											p: 1.5,
-											bgcolor: index % 2 === 0 ? '#f9f9f9' : 'transparent',
+											bgcolor: index % 2 === 0 ? 'action.hover' : 'transparent',
 											borderRadius: 1,
 										}}
 									>
