@@ -102,6 +102,19 @@ jobs:
             exit 1
           fi
 
+      - name: Validar alias y contraseña del keystore
+        shell: bash
+        run: |
+          if ! keytool -list \
+            -keystore android/app/release.keystore \
+            -storepass "$ANDROID_KEYSTORE_PASSWORD" \
+            -alias "$ANDROID_KEY_ALIAS" > /dev/null 2>&1; then
+            echo "ERROR: Alias o contraseña inválidos para el keystore."
+            echo "Alias configurado en secret: $ANDROID_KEY_ALIAS"
+            echo "Revisa ANDROID_KEY_ALIAS y ANDROID_KEYSTORE_PASSWORD en SECRETOS_CREAR_APK_RELEASE."
+            exit 1
+          fi
+
       - name: Construir APK release sin firmar
         run: |
           cd android
