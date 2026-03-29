@@ -182,7 +182,7 @@ function Familias() {
 					<Box sx={{ minHeight: '100vh' }}>
 						{/* Titulo, subtitulo y boton de crear nueva receta*/}
 						<Stack sx={{ mb: 4 }}>
-							<Typography variant="h5"> Mis Familias</Typography>
+							<Typography variant="h5" sx={{ fontWeight: 'bold' }}> Mis Familias</Typography>
 							<Typography variant="subtitle2" color="text.secondary">
 								Gestiona tus grupos de planificación
 							</Typography>

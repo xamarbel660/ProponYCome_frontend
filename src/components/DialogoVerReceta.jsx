@@ -1,25 +1,73 @@
 import {
 	Box,
 	Chip,
+	CircularProgress,
 	Dialog,
 	DialogContent,
+	Divider,
 	IconButton,
 	Typography,
-	CircularProgress,
-	Divider,
 } from '@mui/material';
-import { X, Clock, ChefHat, Utensils } from 'lucide-react';
+import { ChefHat, Utensils, X } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import api from '../utils/api';
 
-function DialogoVerReceta({ idReceta, open, onClose }) {
+function DialogoVerReceta({ idReceta, open, onClose, recetaProp = null, ingredientesProp = null }) {
 	const [receta, setReceta] = useState(null);
 	const [ingredientes, setIngredientes] = useState([]);
 	const [cargando, setCargando] = useState(false);
 
+	const normalizarIngredientes = lista => {
+		if (!Array.isArray(lista)) return [];
+
+		return lista
+			.map(ingrediente => {
+				if (typeof ingrediente === 'string') {
+					return {
+						nombre_ingrediente: ingrediente,
+						cantidad: null,
+						unidad: '',
+					};
+				}
+
+				return {
+					nombre_ingrediente: ingrediente?.nombre_ingrediente || ingrediente?.nombre || '',
+					cantidad: ingrediente?.cantidad ?? null,
+					unidad: ingrediente?.unidad || '',
+				};
+			})
+			.filter(ingrediente => ingrediente.nombre_ingrediente);
+	};
+
 	useEffect(() => {
 		async function fetchDetalles() {
-			if (open && idReceta) {
+			if (!open) {
+				// Limpiamos los datos cuando se cierra para que no parpadee la receta anterior al abrir otra
+				setReceta(null);
+				setIngredientes([]);
+				return;
+			}
+
+			if (recetaProp) {
+				const ingredientesDesdeProps = Array.isArray(ingredientesProp)
+					? ingredientesProp
+					: Array.isArray(recetaProp?.ingredientes)
+						? recetaProp.ingredientes
+						: [];
+				const ingredientesNormalizados = normalizarIngredientes(ingredientesDesdeProps);
+
+				setReceta(recetaProp);
+
+				// Si llegan ingredientes por props, los usamos directamente.
+				// Si no llegan y tenemos id, consultamos backend para completar datos.
+				if (ingredientesNormalizados.length > 0 || !idReceta) {
+					setIngredientes(ingredientesNormalizados);
+					setCargando(false);
+					return;
+				}
+			}
+
+			if (idReceta) {
 				setCargando(true);
 				try {
 					const respuesta = await api.post(`/recetas/${idReceta}`);
@@ -31,15 +79,15 @@ function DialogoVerReceta({ idReceta, open, onClose }) {
 				} finally {
 					setCargando(false);
 				}
-			} else if (!open) {
-				// Limpiamos los datos cuando se cierra para que no parpadee la receta anterior al abrir otra
+			} else {
 				setReceta(null);
 				setIngredientes([]);
+				setCargando(false);
 			}
 		}
 
 		fetchDetalles();
-	}, [open, idReceta]);
+	}, [open, idReceta, recetaProp, ingredientesProp]);
 
 	// Función auxiliar para obtener el color del chip de dificultad
 	const getColorDificultad = dificultad => {
@@ -121,12 +169,14 @@ function DialogoVerReceta({ idReceta, open, onClose }) {
 										<Typography variant="body1" sx={{ fontWeight: 'medium' }}>
 											{ingrediente.nombre_ingrediente}
 										</Typography>
-										<Typography
-											variant="body2"
-											sx={{ color: 'text.secondary', fontWeight: 'bold' }}
-										>
-											{ingrediente.cantidad} {ingrediente.unidad}
-										</Typography>
+										{ingrediente.cantidad !== null || ingrediente.unidad ? (
+											<Typography
+												variant="body2"
+												sx={{ color: 'text.secondary', fontWeight: 'bold' }}
+											>
+												{ingrediente.cantidad ?? ''}{ingrediente.unidad ? ` ${ingrediente.unidad}` : ''}
+											</Typography>
+										) : null}
 									</Box>
 								))}
 							</Box>

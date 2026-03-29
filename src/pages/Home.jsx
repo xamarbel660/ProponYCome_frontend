@@ -95,7 +95,7 @@ function Home() {
 						<IconButton
 							onClick={() => setOpenConfiguracion(true)}
 							aria-label="Configuración"
-							sx={{ position: 'absolute', right: 16 }}
+							sx={{ position: 'absolute', right: 16, color: 'text.secondary' }}
 						>
 							<Bolt color='currentColor' size={30} />
 						</IconButton>

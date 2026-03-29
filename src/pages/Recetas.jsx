@@ -47,6 +47,7 @@ function Recetas() {
 	const [modoDialogo, setModoDialogo] = useState('Nueva');
 	// ID de la receta que se va a borrar o editar
 	const [idRecetaActiva, setIdRecetaActiva] = useState(null);
+	const recetaActiva = recetasRecuperadas.find(receta => receta.id_receta === idRecetaActiva) || null;
 
 	const onSuccess = tipo => {
 		setRecargarDatos(prev => !prev);
@@ -155,7 +156,7 @@ function Recetas() {
 					<Box sx={{ minHeight: '100vh' }}>
 						{/* Titulo, subtitulo y boton de crear nueva receta*/}
 						<Stack sx={{ mb: 4 }}>
-							<Typography variant="h5"> Mi Cuaderno de Recetas</Typography>
+							<Typography variant="h5" sx={{ fontWeight: 'bold' }}> Mi Cuaderno de Recetas</Typography>
 							<Typography variant="subtitle2" color="text.secondary">
 								Guarda y organiza tus recetas favoritas
 							</Typography>
@@ -338,6 +339,7 @@ function Recetas() {
 
 						<DialogoVerReceta
 							idReceta={idRecetaActiva}
+							recetaProp={recetaActiva}
 							open={openDialogVerReceta}
 							onClose={() => handleCloseDialog('Ver')}
 						/>

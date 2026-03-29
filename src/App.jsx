@@ -86,6 +86,11 @@ function App() {
 				light: '#ff8a3d',
 				contrastText: '#ffffff',
 			},
+			inverse: {
+				main: mode === 'dark' ? '#ffffff' : '#000000',
+				contrastText: mode === 'dark' ? '#000000' : '#ffffff',
+				hover: mode === 'dark' ? '#ededed' : '#222222',
+			},
 			background:
 				mode === 'dark'
 					? {
@@ -109,6 +114,19 @@ function App() {
 			divider: mode === 'dark' ? '#2b3240' : '#e5e7eb',
 		},
 		components: {
+			MuiIconButton: {
+				styleOverrides: {
+					root: {
+						'&.invert-surface': {
+							backgroundColor: mode === 'dark' ? '#ffffff' : '#000000',
+							color: mode === 'dark' ? '#000000' : '#ffffff',
+							'&:hover': {
+								backgroundColor: mode === 'dark' ? '#ededed' : '#222222',
+							},
+						},
+					},
+				},
+			},
 			MuiPaper: {
 				styleOverrides: {
 					root: {
@@ -129,6 +147,24 @@ function App() {
 				styleOverrides: {
 					root: {
 						border: `1px solid ${mode === 'dark' ? '#2b3240' : '#e5e7eb'}`,
+						'&.ia-highlight-card': {
+							borderRadius: 8,
+							backgroundColor: mode === 'dark' ? '#2a2031' : '#fcf3fb',
+							border: mode === 'dark' ? '1px solid #5d3f6b' : '1px solid #e9d4ff',
+						},
+					},
+				},
+			},
+			MuiTypography: {
+				styleOverrides: {
+					root: {
+						'&.ia-highlight-title': {
+							fontWeight: 700,
+							color: mode === 'dark' ? '#f3f4f6' : '#000000',
+							'& .ia-highlight-icon': {
+								color: mode === 'dark' ? '#d8b4ff' : '#7e22ce',
+							},
+						},
 					},
 				},
 			},
