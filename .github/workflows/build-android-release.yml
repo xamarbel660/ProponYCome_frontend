@@ -1,0 +1,110 @@
+name: Build Android APK Release
+
+on:
+  workflow_dispatch:
+
+jobs:
+  build-release:
+    runs-on: ubuntu-latest
+    env:
+      FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Configurar Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Instalar dependencias y build web
+        run: |
+          npm install
+          npm run build
+
+      - name: Sincronizar Capacitor
+        run: npx cap sync android
+
+      - name: Configurar Java
+        uses: actions/setup-java@v4
+        with:
+          java-version: '21'
+          distribution: 'zulu'
+
+      - name: Cargar secretos de firma desde SECRETOS_CREAR_APK_RELEASE
+        shell: bash
+        env:
+          RELEASE_SECRETS: ${{ secrets.SECRETOS_CREAR_APK_RELEASE }}
+        run: |
+          if [ -z "$RELEASE_SECRETS" ]; then
+            echo "ERROR: Falta el secret SECRETOS_CREAR_APK_RELEASE"
+            exit 1
+          fi
+
+          printf "%s" "$RELEASE_SECRETS" > release.env
+
+          required_keys=(
+            ANDROID_KEYSTORE_BASE64
+            ANDROID_KEYSTORE_PASSWORD
+            ANDROID_KEY_ALIAS
+            ANDROID_KEY_PASSWORD
+          )
+
+          for key in "${required_keys[@]}"; do
+            if ! grep -q "^${key}=" release.env; then
+              echo "ERROR: Falta ${key} dentro de SECRETOS_CREAR_APK_RELEASE"
+              exit 1
+            fi
+          done
+
+          grep -E '^(ANDROID_KEYSTORE_BASE64|ANDROID_KEYSTORE_PASSWORD|ANDROID_KEY_ALIAS|ANDROID_KEY_PASSWORD)=' release.env >> "$GITHUB_ENV"
+
+      - name: Generar keystore temporal
+        shell: bash
+        run: |
+          echo "$ANDROID_KEYSTORE_BASE64" | base64 -d > android/app/release.keystore
+
+      - name: Construir APK release sin firmar
+        run: |
+          cd android
+          chmod +x gradlew
+          ./gradlew assembleRelease
+
+      - name: Firmar APK release
+        shell: bash
+        run: |
+          UNSIGNED_APK="android/app/build/outputs/apk/release/app-release-unsigned.apk"
+          ALIGNED_APK="android/app/build/outputs/apk/release/app-release-aligned.apk"
+          SIGNED_APK="android/app/build/outputs/apk/release/app-release-signed.apk"
+
+          if [ ! -f "$UNSIGNED_APK" ]; then
+            echo "ERROR: No se encontró $UNSIGNED_APK"
+            exit 1
+          fi
+
+          BUILD_TOOLS_VERSION=$(ls "$ANDROID_HOME/build-tools" | sort -V | tail -n 1)
+          ZIPALIGN="$ANDROID_HOME/build-tools/$BUILD_TOOLS_VERSION/zipalign"
+          APKSIGNER="$ANDROID_HOME/build-tools/$BUILD_TOOLS_VERSION/apksigner"
+
+          "$ZIPALIGN" -v -p 4 "$UNSIGNED_APK" "$ALIGNED_APK"
+
+          "$APKSIGNER" sign \
+            --ks android/app/release.keystore \
+            --ks-pass pass:"$ANDROID_KEYSTORE_PASSWORD" \
+            --ks-key-alias "$ANDROID_KEY_ALIAS" \
+            --key-pass pass:"$ANDROID_KEY_PASSWORD" \
+            --out "$SIGNED_APK" \
+            "$ALIGNED_APK"
+
+          "$APKSIGNER" verify --verbose "$SIGNED_APK"
+
+      - name: Subir APK release firmado
+        uses: actions/upload-artifact@v4
+        with:
+          name: ProponYCome-App-Release
+          path: android/app/build/outputs/apk/release/app-release-signed.apk
+
+      - name: Limpiar keystore temporal
+        if: always()
+        run: rm -f android/app/release.keystore release.env
