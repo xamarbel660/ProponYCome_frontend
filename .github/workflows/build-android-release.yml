@@ -65,7 +65,26 @@ jobs:
       - name: Generar keystore temporal
         shell: bash
         run: |
-          KEYSTORE_B64_CLEAN=$(printf "%s" "$ANDROID_KEYSTORE_BASE64" | tr -d '\r\n ')
+          KEYSTORE_B64_CLEAN=$(printf "%s" "$ANDROID_KEYSTORE_BASE64" | tr -d '\r\n\t ')
+
+          # Soporta valores pegados con comillas o con prefijo data URI.
+          KEYSTORE_B64_CLEAN="${KEYSTORE_B64_CLEAN%\"}"
+          KEYSTORE_B64_CLEAN="${KEYSTORE_B64_CLEAN#\"}"
+          KEYSTORE_B64_CLEAN="${KEYSTORE_B64_CLEAN#data:*;base64,}"
+
+          # Si llega en formato URL-safe, lo normalizamos a base64 estándar.
+          KEYSTORE_B64_CLEAN="${KEYSTORE_B64_CLEAN//-/+}"
+          KEYSTORE_B64_CLEAN="${KEYSTORE_B64_CLEAN//_//}"
+
+          MOD4=$(( ${#KEYSTORE_B64_CLEAN} % 4 ))
+          if [ "$MOD4" -eq 2 ]; then
+            KEYSTORE_B64_CLEAN="${KEYSTORE_B64_CLEAN}=="
+          elif [ "$MOD4" -eq 3 ]; then
+            KEYSTORE_B64_CLEAN="${KEYSTORE_B64_CLEAN}="
+          elif [ "$MOD4" -eq 1 ]; then
+            echo "ERROR: Longitud inválida de ANDROID_KEYSTORE_BASE64 (${#KEYSTORE_B64_CLEAN})"
+            exit 1
+          fi
 
           if [ -z "$KEYSTORE_B64_CLEAN" ]; then
             echo "ERROR: ANDROID_KEYSTORE_BASE64 está vacío"
@@ -73,7 +92,8 @@ jobs:
           fi
 
           if ! printf "%s" "$KEYSTORE_B64_CLEAN" | base64 --decode > android/app/release.keystore; then
-            echo "ERROR: ANDROID_KEYSTORE_BASE64 no es base64 válido. Regenera el valor y pégalo sin comillas ni encabezados."
+            echo "ERROR: ANDROID_KEYSTORE_BASE64 no es base64 válido. Longitud detectada: ${#KEYSTORE_B64_CLEAN}."
+            echo "Regenera el valor desde el archivo .keystore y pégalo en una sola línea sin comillas."
             exit 1
           fi
 
