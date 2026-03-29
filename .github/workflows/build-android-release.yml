@@ -43,6 +43,8 @@ jobs:
           fi
 
           printf "%s" "$RELEASE_SECRETS" > release.env
+          tr -d '\r' < release.env > release-clean.env
+          mv release-clean.env release.env
 
           required_keys=(
             ANDROID_KEYSTORE_BASE64
@@ -63,7 +65,22 @@ jobs:
       - name: Generar keystore temporal
         shell: bash
         run: |
-          echo "$ANDROID_KEYSTORE_BASE64" | base64 -d > android/app/release.keystore
+          KEYSTORE_B64_CLEAN=$(printf "%s" "$ANDROID_KEYSTORE_BASE64" | tr -d '\r\n ')
+
+          if [ -z "$KEYSTORE_B64_CLEAN" ]; then
+            echo "ERROR: ANDROID_KEYSTORE_BASE64 está vacío"
+            exit 1
+          fi
+
+          if ! printf "%s" "$KEYSTORE_B64_CLEAN" | base64 --decode > android/app/release.keystore; then
+            echo "ERROR: ANDROID_KEYSTORE_BASE64 no es base64 válido. Regenera el valor y pégalo sin comillas ni encabezados."
+            exit 1
+          fi
+
+          if [ ! -s android/app/release.keystore ]; then
+            echo "ERROR: No se pudo generar un keystore válido"
+            exit 1
+          fi
 
       - name: Construir APK release sin firmar
         run: |
