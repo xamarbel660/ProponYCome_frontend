@@ -1,4 +1,4 @@
-import { Box, Button, Card, CardActions, CardContent, Chip, CircularProgress, Grid, IconButton, Stack, TextField, Typography } from '@mui/material';
+import { Alert, Box, Button, Card, CardActions, CardContent, Chip, CircularProgress, Grid, IconButton, Stack, TextField, Typography, Zoom } from '@mui/material';
 import { BookPlus, Check, Eye, Send, Sparkles } from 'lucide-react';
 import { useState } from 'react';
 import api from '../utils/api';
@@ -19,6 +19,12 @@ function IA() {
 			"dificultad": "Fácil"
 		} */
 	const [recetasAñadidas, setRecetasAñadidas] = useState([]);
+	// Estado para mostrar alertas
+	const [alerta, setAlerta] = useState({
+		mostrar: false,
+		mensaje: '',
+		severidad: 'success',
+	});
 
 	// Cuando se pulsa el botón de enviar, se ejecuta esta función
 	const handleSubmit = async () => {
@@ -46,27 +52,30 @@ function IA() {
 					: [];
 
 			setRecetasIARecuperadas(recetas);
+			setAlerta({
+				mostrar: true,
+				mensaje: 'Recetas sugeridas correctamente',
+				severidad: 'success'
+			});
+			// Ocultamos la alerta después de 3 segundos
+			setTimeout(() => {
+				setAlerta(prev => ({ ...prev, mostrar: false }));
+			}, 3000);
 		} catch (error) {
 			console.log('Error al enviar:', error);
+			setAlerta({
+				mostrar: true,
+				mensaje: 'Error al obtener recetas sugeridas',
+				severidad: 'error'
+			});
+			// Ocultamos la alerta después de 3 segundos
+			setTimeout(() => {
+				setAlerta(prev => ({ ...prev, mostrar: false }));
+			}, 3000);
 		} finally {
 			setIsUpdating(false);
 		}
 	};
-
-	/* {
-	  "receta": {
-		"titulo": "Receta de prueba2",
-		"descripcion": "Descripcion de prueba2",
-		"dificultad": "Media"
-	  },
-	  "ingredientes": [
-		{
-		  "nombre_ingrediente": "Espaguetis",
-		  "cantidad": 69,
-		  "unidad": "gramos"
-		}
-	  ]
-	} */
 
 	const handleAñadirReceta = async (receta) => {
 		if (recetasAñadidas.includes(receta.titulo)) return;
@@ -86,9 +95,27 @@ function IA() {
 		try {
 			await api.post('/recetas/new', payload);
 			setRecetasAñadidas([...recetasAñadidas, receta.titulo]);
+			setAlerta({
+				mostrar: true,
+				mensaje: 'Receta añadida al cuaderno',
+				severidad: 'success'
+			});
+			// Ocultamos la alerta después de 3 segundos
+			setTimeout(() => {
+				setAlerta(prev => ({ ...prev, mostrar: false }));
+			}, 3000);
 		} catch (error) {
 			console.log('Error guardando:', error);
 			// Podrías poner aquí un setErrores({ global: "Error en el servidor" }) si quisieras
+			setAlerta({
+				mostrar: true,
+				mensaje: 'Error al guardar la receta',
+				severidad: 'error'
+			});
+			// Ocultamos la alerta después de 3 segundos
+			setTimeout(() => {
+				setAlerta(prev => ({ ...prev, mostrar: false }));
+			}, 3000);
 		} finally {
 			setAñadiendoReceta(false);
 		}
@@ -109,7 +136,22 @@ function IA() {
 	const obtenerNombreIngrediente = ingrediente => {
 		if (typeof ingrediente === 'string') return ingrediente;
 		if (ingrediente && typeof ingrediente === 'object') {
-			return ingrediente.nombre_ingrediente || ingrediente.nombre || '';
+			if (typeof ingrediente.nombre_ingrediente === 'string') {
+				return ingrediente.nombre_ingrediente;
+			}
+
+			if (ingrediente.nombre_ingrediente && typeof ingrediente.nombre_ingrediente === 'object') {
+				if (typeof ingrediente.nombre_ingrediente.nombre_ingrediente === 'string') {
+					return ingrediente.nombre_ingrediente.nombre_ingrediente;
+				}
+				if (typeof ingrediente.nombre_ingrediente.nombre === 'string') {
+					return ingrediente.nombre_ingrediente.nombre;
+				}
+			}
+
+			if (typeof ingrediente.nombre === 'string') {
+				return ingrediente.nombre;
+			}
 		}
 		return '';
 	};
@@ -209,142 +251,144 @@ function IA() {
 									flexDirection: 'column',
 									justifyContent: 'center',
 									alignItems: 'center',
-									minHeight: '45vh',
+									minHeight: '30vh',
 									gap: 2,
 									textAlign: 'center',
 								}}
 							>
-								<CircularProgress />
-								<Typography variant="body1" color="text.secondary">
-									Encendiendo los fogones
-								</Typography>
+								<Card sx={{ p: 4, bgcolor: 'background.paper' }}>
+									<CircularProgress />
+									<Typography variant="h5" color="text.secondary">
+										Encendiendo los fogones
+									</Typography>
+								</Card>
+
 							</Box>
-
-						) : null}
-
-						<Grid container spacing={1}>
-							{recetasIARecuperadas.map(row => (
-								<Grid size={{ xs: 12, sm: 6, md: 4, lg: 3 }} key={row.titulo}>
-									<Card sx={{ borderRadius: 2, mb: 2 }}>
-										<CardContent>
-											{/* Titulo y dificultad */}
-											<Box
-												sx={{
-													display: 'flex',
-													justifyContent: 'space-between',
-													alignItems: 'center',
-													mb: 1,
-												}}
-											>
-												<Typography variant="body1" component="div" sx={{ fontWeight: 'bold' }}>
-													{row.titulo}
-												</Typography>
-												<Chip
-													label={row.dificultad}
-													color={
-														row.dificultad === 'Fácil'
-															? 'success'
-															: row.dificultad === 'Media'
-																? 'warning'
-																: 'error'
-													}
-													sx={{ borderRadius: 3 }}
-												/>
-											</Box>
-											{/* Descripcion e ingredientes */}
-											<Box
-												sx={{
-													display: 'block',
-													mb: 1,
-												}}
-											>
-												<Typography
-													variant="subtitle1"
+						) : (
+							<Grid container spacing={1}>
+								{recetasIARecuperadas.map(row => (
+									<Grid size={{ xs: 12, sm: 6, md: 4, lg: 3 }} key={row.titulo}>
+										<Card sx={{ borderRadius: 2, mb: 2 }}>
+											<CardContent>
+												{/* Titulo y dificultad */}
+												<Box
 													sx={{
-														color: 'text.secondary',
-														mb: 3,
-														display: '-webkit-box',
-														WebkitLineClamp: 2,
-														WebkitBoxOrient: 'vertical',
-														overflow: 'hidden',
+														display: 'flex',
+														justifyContent: 'space-between',
+														alignItems: 'center',
+														mb: 1,
 													}}
 												>
-													{row.descripcion}
-												</Typography>
+													<Typography variant="body1" component="div" sx={{ fontWeight: 'bold' }}>
+														{row.titulo}
+													</Typography>
+													<Chip
+														label={row.dificultad}
+														color={
+															row.dificultad === 'Fácil'
+																? 'success'
+																: row.dificultad === 'Media'
+																	? 'warning'
+																	: 'error'
+														}
+														sx={{ borderRadius: 3 }}
+													/>
+												</Box>
+												{/* Descripcion e ingredientes */}
 												<Box
 													sx={{
 														display: 'block',
-														alignItems: 'center',
-														color: 'text.secondary',
-														gap: 1,
-														mb: 2,
+														mb: 1,
 													}}
 												>
 													<Typography
-														variant="body1"
-													>
-														Ingredientes:
-													</Typography>
-													{(row.ingredientes || []).map((ing, index) => {
-														const nombreIngrediente = obtenerNombreIngrediente(ing);
-														if (!nombreIngrediente) return null;
-
-														return (
-															<Chip
-																key={index}
-																label={nombreIngrediente}
-																size="small"
-																sx={{ borderRadius: 3, mx: 0.5 }}
-															/>
-														);
-													})}
-												</Box>
-											</Box>
-											{/* Boton añadir receta a cuaderno */}
-											{recetasAñadidas.includes(row.titulo) ? (
-												<Box sx={{ display: 'flex', gap: 1, alignItems: 'center', alignContent: 'center' }}>
-													<Check size={18} color="green" />
-													<Typography variant="body2" color="success.main" sx={{ fontWeight: 'bold' }}>
-														Receta añadida al cuaderno
-													</Typography>
-												</Box>
-											) : (
-												<Box sx={{ display: 'flex', gap: 1 }}>
-													<IconButton
-														aria-label="Ver Receta"
-														onClick={() => handleClickOpenDialog(row)}
+														variant="subtitle1"
 														sx={{
-															border: '1px solid',
-															borderRadius: 2,
-															borderColor: 'divider',
-															width: 34,
-															height: 34,
+															color: 'text.secondary',
+															mb: 3,
+															display: '-webkit-box',
+															WebkitLineClamp: 2,
+															WebkitBoxOrient: 'vertical',
+															overflow: 'hidden',
 														}}
 													>
-														<Eye color="#ff6900" size={18} />
-													</IconButton>
-													<Button
-														startIcon={<BookPlus />}
-														variant="outlined"
-														size="small"
-														onClick={() => handleAñadirReceta(row)}
+														{row.descripcion}
+													</Typography>
+													<Box
 														sx={{
-															color: 'text.primary',
-															borderRadius: 2,
-															borderColor: 'divider',
-															flexGrow: 1,
+															display: 'block',
+															alignItems: 'center',
+															color: 'text.secondary',
+															gap: 1,
+															mb: 2,
 														}}
 													>
-														Añadir al Cuaderno
-													</Button>
-												</Box>
-											)}
+														<Typography
+															variant="body1"
+														>
+															Ingredientes:
+														</Typography>
+														{(row.ingredientes || []).map((ing, index) => {
+															const nombreIngrediente = obtenerNombreIngrediente(ing);
+															if (!nombreIngrediente) return null;
 
-										</CardContent>
-									</Card>
-								</Grid>
-							))}
-						</Grid>
+															return (
+																<Chip
+																	key={index}
+																	label={nombreIngrediente}
+																	size="small"
+																	sx={{ borderRadius: 3, mx: 0.5 }}
+																/>
+															);
+														})}
+													</Box>
+												</Box>
+												{/* Boton añadir receta a cuaderno */}
+												{recetasAñadidas.includes(row.titulo) ? (
+													<Box sx={{ display: 'flex', gap: 1, alignItems: 'center', alignContent: 'center' }}>
+														<Check size={18} color="green" />
+														<Typography variant="body2" color="success.main" sx={{ fontWeight: 'bold' }}>
+															Receta añadida al cuaderno
+														</Typography>
+													</Box>
+												) : (
+													<Box sx={{ display: 'flex', gap: 1 }}>
+														<IconButton
+															aria-label="Ver Receta"
+															onClick={() => handleClickOpenDialog(row)}
+															sx={{
+																border: '1px solid',
+																borderRadius: 2,
+																borderColor: 'divider',
+																width: 34,
+																height: 34,
+															}}
+														>
+															<Eye color="#ff6900" size={18} />
+														</IconButton>
+														<Button
+															startIcon={<BookPlus />}
+															variant="outlined"
+															size="small"
+															onClick={() => handleAñadirReceta(row)}
+															sx={{
+																color: 'text.primary',
+																borderRadius: 2,
+																borderColor: 'divider',
+																flexGrow: 1,
+															}}
+														>
+															Añadir al Cuaderno
+														</Button>
+													</Box>
+												)}
+
+											</CardContent>
+										</Card>
+									</Grid>
+								))}
+							</Grid>
+						)}
 
 					</Box>
 				</Stack>
@@ -356,11 +400,11 @@ function IA() {
 				onClose={() => setOpenDialogVerReceta(false)}
 			/>
 			{/* Renderizado del mensaje de alerta unificado */}
-			{/* {alerta.mostrar && (
+			{alerta.mostrar && (
 				<Box
 					sx={{
 						position: 'fixed',
-						top: '85%',
+						top: '83%',
 						left: '50%',
 						transform: 'translate(-50%, -50%)',
 						zIndex: 2000,
@@ -382,7 +426,7 @@ function IA() {
 						</Alert>
 					</Zoom>
 				</Box>
-			)} */}
+			)}
 		</>
 	);
 }

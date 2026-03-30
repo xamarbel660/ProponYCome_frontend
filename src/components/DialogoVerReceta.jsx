@@ -22,16 +22,29 @@ function DialogoVerReceta({ idReceta, open, onClose, recetaProp = null, ingredie
 
 		return lista
 			.map(ingrediente => {
+				const nombreIngrediente =
+					typeof ingrediente === 'string'
+						? ingrediente
+						: typeof ingrediente?.nombre_ingrediente === 'string'
+							? ingrediente.nombre_ingrediente
+							: typeof ingrediente?.nombre_ingrediente?.nombre_ingrediente === 'string'
+								? ingrediente.nombre_ingrediente.nombre_ingrediente
+								: typeof ingrediente?.nombre_ingrediente?.nombre === 'string'
+									? ingrediente.nombre_ingrediente.nombre
+									: typeof ingrediente?.nombre === 'string'
+										? ingrediente.nombre
+										: '';
+
 				if (typeof ingrediente === 'string') {
 					return {
-						nombre_ingrediente: ingrediente,
+						nombre_ingrediente: nombreIngrediente,
 						cantidad: null,
 						unidad: '',
 					};
 				}
 
 				return {
-					nombre_ingrediente: ingrediente?.nombre_ingrediente || ingrediente?.nombre || '',
+					nombre_ingrediente: nombreIngrediente,
 					cantidad: ingrediente?.cantidad ?? null,
 					unidad: ingrediente?.unidad || '',
 				};
