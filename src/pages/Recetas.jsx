@@ -15,7 +15,7 @@ import {
 import { ChartNoAxesColumnIncreasing, Plus, SquarePen, Trash2, Eye } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import DialogoConfirmacion from '../components/DialogoConfirmacion';
-import DialogoReceta from '../components/DialogoReceta';
+import DialogoReceta from '../components/DialogoCrearReceta';
 import api from '../utils/api';
 import DialogoVerReceta from '../components/DialogoVerReceta';
 

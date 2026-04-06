@@ -38,12 +38,12 @@ function DialogoCodigoInvitacion({ open, onClose, esAdmin, nombreFamilia, codigo
             const codigoActualizado = response.datos;
             setCodigoLocal(codigoActualizado);
             setGenerado(true);
-            
+
             // Notificamos al padre que se actualizó el código
             if (onCodigoActualizado) {
                 onCodigoActualizado(codigoActualizado);
             }
-            
+
             // Después de 3 segundos, ocultamos el mensaje
             setTimeout(() => setGenerado(false), 3000);
         } catch (error) {

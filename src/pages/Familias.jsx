@@ -2,7 +2,7 @@ import { Alert, Box, Button, Card, CardContent, Chip, Grid, Pagination, Stack, T
 import { grey } from '@mui/material/colors';
 import { Crown, Eye, LogOut, Plus, QrCode, Trash2, UserPlus, Users } from 'lucide-react';
 import { useEffect, useState } from 'react';
-import DialogoCodigoInvitacion from '../components/DialogoCodigoInvitacion';
+import DialogoCodigoInvitacion from '../components/DialogoCodigoInvitacionFamilia';
 import DialogoConfirmacion from '../components/DialogoConfirmacion';
 import DialogoFamilia from '../components/DialogoFamilia';
 import DialogoVerMiembros from '../components/DialogoVerMiembros';
