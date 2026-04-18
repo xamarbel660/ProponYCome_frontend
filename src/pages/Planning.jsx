@@ -1,6 +1,5 @@
 import {
 	Box,
-	Card,
 	FormControl,
 	IconButton,
 	InputLabel,
@@ -9,11 +8,11 @@ import {
 	Stack,
 	Typography
 } from '@mui/material';
-import { useEffect, useState } from 'react';
 import { MoveLeft, MoveRight } from 'lucide-react';
+import { useCallback, useEffect, useRef, useState } from 'react';
+import CardDiaSemanalPlanning from '../components/CardDiaSemanalPlanning';
 import api from '../utils/api';
 import { formatearFechaAmigable, obtenerLimitesSemana } from '../utils/diasSemana';
-import CardDiaSemanalPlanning from '../components/CardDiaSemanalPlanning';
 const LIMITE_SEMANAS = 5;
 
 function Planning() {
@@ -23,6 +22,11 @@ function Planning() {
 	const [familiaSeleccionada, setFamiliaSeleccionada] = useState('');
 	// Propuestas de la familia seleccionada
 	const [planningFamilia, setPlanningFamilia] = useState([]);
+	const [refreshPlanningKey, setRefreshPlanningKey] = useState(0);
+	// Recetas del usuario (se cargan una sola vez bajo demanda al abrir el diálogo)
+	const [recetasRecuperadas, setRecetasRecuperadas] = useState([]);
+	const recetasCargadasRef = useRef(false);
+	const recetasRequestRef = useRef(null);
 	// Fecha actual para calcular la semana que se muestra
 	const [fechaBase, setFechaBase] = useState(new Date());
 	// Desplazamiento en semanas respecto a la fecha actual (puede ser negativo, positivo o 0)
@@ -32,6 +36,9 @@ function Planning() {
 	// Strings para enviar a la API y mostrar en el título de la semana
 	const inicioStr = lunes.toISOString().split('T')[0];
 	const finStr = domingo.toISOString().split('T')[0];
+
+	// Guardamos si el usuario es administrador de la familia para mostrarle o no ciertas opciones en el planning
+	const [esAdminFamilia, setEsAdminFamilia] = useState(false);
 
 	// Texto para el título de la semana y control de habilitación de botones de navegación
 	const textoLunes = formatearFechaAmigable(lunes);
@@ -91,7 +98,7 @@ function Planning() {
 		familiasUsuario();
 	}, []);
 
-	// Cargamos el planning de la familia cada vez que cambie la familia seleccionada o las fechas
+	// Cargamos el planning de la familia cada vez que cambie la familia seleccionada, las fechas o se fuerce refresco
 	useEffect(() => {
 		if (!familiaSeleccionada) {
 			return;
@@ -102,7 +109,7 @@ function Planning() {
 				id_familia: familiaSeleccionada,
 				fecha_inicio: inicioStr,
 				fecha_fin: finStr
-			}
+			};
 
 			try {
 				const planningRecuperado = await api.post('/planning/', { datosPropuestas: payload });
@@ -114,10 +121,41 @@ function Planning() {
 		}
 
 		planningDeLaFamilia();
-	}, [familiaSeleccionada, inicioStr, finStr]);
+	}, [familiaSeleccionada, inicioStr, finStr, refreshPlanningKey]);
+
+	const refrescarPlanning = () => {
+		setRefreshPlanningKey((anterior) => anterior + 1);
+	};
+
+	const cargarRecetasUsuario = useCallback(async () => {
+		if (recetasCargadasRef.current) {
+			return;
+		}
+
+		if (recetasRequestRef.current) {
+			return recetasRequestRef.current;
+		}
+
+		recetasRequestRef.current = api.post('/recetas/')
+			.then((respuesta) => {
+				setRecetasRecuperadas(respuesta.datos?.recetas || []);
+				recetasCargadasRef.current = true;
+			})
+			.catch((error) => {
+				console.log(error);
+				setRecetasRecuperadas([]);
+			})
+			.finally(() => {
+				recetasRequestRef.current = null;
+			});
+
+		return recetasRequestRef.current;
+	}, []);
 
 	const handleChange = (event) => {
+		setPlanningFamilia([]);
 		setFamiliaSeleccionada(event.target.value);
+		setEsAdminFamilia(familiasRecuperadas.find(f => f.id_familia === event.target.value)?.es_admin || false);
 	};
 
 	return (
@@ -129,7 +167,7 @@ function Planning() {
 				}}
 			>
 				<Stack spacing={2}>
-					<Box sx={{ minHeight: '100vh' }}>
+					<Box>
 						{/* Titulo, subtitulo y select de las familias */}
 						<Stack>
 							<Typography variant="h5" sx={{ fontWeight: 'bold' }}> Planificador Semanal</Typography>
@@ -186,9 +224,14 @@ function Planning() {
 									// Pintamos la tarjeta de este día.
 									return (
 										<CardDiaSemanalPlanning
+											key={index}
 											index={index}
 											propuestasDelDia={propuestasDelDia}
 											diaObj={diaObj}
+											recetasRecuperadas={recetasRecuperadas}
+											cargarRecetasUsuario={cargarRecetasUsuario}
+											familiaSeleccionada={familiaSeleccionada}
+											onPropuestaCreada={refrescarPlanning}
 										/>
 									);
 								})}

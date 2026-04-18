@@ -153,7 +153,7 @@ function Recetas() {
 				}}
 			>
 				<Stack spacing={2}>
-					<Box sx={{ minHeight: '100vh' }}>
+					<Box>
 						{/* Titulo, subtitulo y boton de crear nueva receta*/}
 						<Stack sx={{ mb: 4 }}>
 							<Typography variant="h5" sx={{ fontWeight: 'bold' }}> Mi Cuaderno de Recetas</Typography>

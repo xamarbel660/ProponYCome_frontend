@@ -1,23 +1,23 @@
 import { Alert, Box, Button, Card, CardActions, CardContent, Chip, CircularProgress, Grid, IconButton, Stack, TextField, Typography, Zoom } from '@mui/material';
 import { BookPlus, Check, Eye, Send, Sparkles } from 'lucide-react';
-import { useState } from 'react';
-import api from '../utils/api';
+import { useEffect, useState } from 'react';
 import DialogoVerReceta from '../components/DialogoVerReceta';
+import api from '../utils/api';
+
+const mensajesCargando = [
+	'Encendiendo los fogones...',
+	'El Chef IA está leyendo tus ingredientes...',
+	'Creando recetas únicas...'
+];
 
 function IA() {
 	const [ingredientesIA, setIngredientesIA] = useState('');
 	const [openDialogVerReceta, setOpenDialogVerReceta] = useState(false);
 	const [recetaActiva, setRecetaActiva] = useState(null);
 	const [isUpdating, setIsUpdating] = useState(false);
+	const [mensajeCargaIndex, setMensajeCargaIndex] = useState(0);
 	const [añadiendoReceta, setAñadiendoReceta] = useState(false);
 	const [recetasIARecuperadas, setRecetasIARecuperadas] = useState([]);
-	/* {
-			"titulo": "Nombre de la receta",
-			"descripcion": "Breve descripción de los pasos a seguir",
-			"ingredientes": ["zanahoria", "patata", "cebolla"],
-			"cantidad_ingredientes": 2,
-			"dificultad": "Fácil"
-		} */
 	const [recetasAñadidas, setRecetasAñadidas] = useState([]);
 	// Estado para mostrar alertas
 	const [alerta, setAlerta] = useState({
@@ -26,11 +26,26 @@ function IA() {
 		severidad: 'success',
 	});
 
+	// Efecto para cambiar el mensaje de carga cada 5 segundos mientras isUpdating es true
+	useEffect(() => {
+		if (!isUpdating) {
+			setMensajeCargaIndex(0);
+			return;
+		}
+
+		const intervalId = setInterval(() => {
+			setMensajeCargaIndex(prev => (prev + 1) % mensajesCargando.length);
+		}, 5000);
+
+		return () => clearInterval(intervalId);
+	}, [isUpdating]);
+
 	// Cuando se pulsa el botón de enviar, se ejecuta esta función
 	const handleSubmit = async () => {
 		// Evitamos envíos duplicados por pulsar el botón tras el mensaje de inserción correcta
 		if (isUpdating) return;
 		// Bloqueamos botones y enviamos
+		setMensajeCargaIndex(0);
 		setIsUpdating(true);
 
 		const ingredientesFormateados = ingredientesIA.split(',').map(ing => ing.trim()).filter(ing => ing !== '');
@@ -57,15 +72,17 @@ function IA() {
 				mensaje: 'Recetas sugeridas correctamente',
 				severidad: 'success'
 			});
+
 			// Ocultamos la alerta después de 3 segundos
 			setTimeout(() => {
 				setAlerta(prev => ({ ...prev, mostrar: false }));
 			}, 3000);
 		} catch (error) {
 			console.log('Error al enviar:', error);
+			const mensajeError = error?.mensaje || 'Error al obtener recetas sugeridas';
 			setAlerta({
 				mostrar: true,
-				mensaje: 'Error al obtener recetas sugeridas',
+				mensaje: mensajeError,
 				severidad: 'error'
 			});
 			// Ocultamos la alerta después de 3 segundos
@@ -127,7 +144,7 @@ function IA() {
 		setIngredientesIA(e.target.value);
 	};
 
-	// Abre el dialog de Nueva/Editar/Eliminar receta
+	// Abre el dialog de Ver receta
 	const handleClickOpenDialog = receta => {
 		setRecetaActiva(receta);
 		setOpenDialogVerReceta(true);
@@ -183,7 +200,7 @@ function IA() {
 			<Box sx={{ p: 2 }}>
 				{/* 2. Un Stack para apilar tus elementos verticalmente con una separación uniforme */}
 				<Stack spacing={2}>
-					<Box sx={{ minHeight: '100vh' }}>
+					<Box>
 						{/* Titulo, subtitulo y boton de crear nueva receta*/}
 						<Stack sx={{ mb: 4 }}>
 							<Typography variant="h5" sx={{ fontWeight: 'bold' }}> Asistente de Cocina IA </Typography>
@@ -194,7 +211,7 @@ function IA() {
 
 						{/* Card para ingresar ingredientes */}
 						<Grid container spacing={1}>
-							<Card className="ia-highlight-card" sx={{ mb: 2 }}>
+							<Card className="ia-highlight-card" sx={{ mb: 2, width: '100%' }}>
 								<CardContent>
 									{/* Titulo, subtitulo*/}
 									<Box
@@ -256,10 +273,10 @@ function IA() {
 									textAlign: 'center',
 								}}
 							>
-								<Card sx={{ p: 4, bgcolor: 'background.paper' }}>
+								<Card sx={{ p: 4, bgcolor: 'background.paper', borderColor: 'primary.main' }}>
 									<CircularProgress />
 									<Typography variant="h5" color="text.secondary">
-										Encendiendo los fogones
+										{mensajesCargando[mensajeCargaIndex]}
 									</Typography>
 								</Card>
 
