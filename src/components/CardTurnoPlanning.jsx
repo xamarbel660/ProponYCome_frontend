@@ -6,6 +6,7 @@ import {
     Button,
     Card,
     CardActions,
+    Chip,
     Grid,
     Typography
 } from '@mui/material';
@@ -46,6 +47,7 @@ function CardTurnoPlanning({
                     <Typography variant="body1">
                         {propuesta.receta?.titulo || 'Receta sin titulo'}
                     </Typography>
+                    <Chip label={propuesta.estado} size="extraSmall" color={propuesta.estado === 'APROBADO' ? 'success' : 'warning'} sx={{borderRadius:1}} />
                     <Typography variant="body2">
                         Propuesto por {propuesta.usuario?.nombre || 'Usuario'}
                     </Typography>
