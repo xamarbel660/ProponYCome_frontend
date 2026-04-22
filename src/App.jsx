@@ -4,6 +4,9 @@
  */
 import { createBrowserRouter, Navigate } from 'react-router';
 import { RouterProvider } from 'react-router/dom';
+import { useEffect } from 'react';
+import { Capacitor } from '@capacitor/core';
+import { SplashScreen } from '@capacitor/splash-screen';
 import AuthPage from './pages/AuthPage';
 import Compras from './pages/Compras';
 import ErrorPage from './pages/ErrorPage';
@@ -93,6 +96,20 @@ const router = createBrowserRouter([
  * @returns {JSX.Element} La aplicación completa envuelta en proveedores de contexto.
  */
 function App() {
+	useEffect(() => {
+		if (!Capacitor.isNativePlatform()) return;
+
+		const hideLaunchSplash = async () => {
+			try {
+				await SplashScreen.hide();
+			} catch {
+				// Evita romper el arranque si el plugin no esta disponible en este entorno.
+			}
+		};
+
+		void hideLaunchSplash();
+	}, []);
+
 	// Recuperamos el modo (dark / light) del store global de Zustand
 	// Esto permite persistencia del tema entre recargas
 	const mode = useThemeStore((state) => state.mode);
