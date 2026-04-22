@@ -1,3 +1,6 @@
+/**
+ * @fileoverview Dialogo para crear y editar recetas con ingredientes dinamicos.
+ */
 import { Autocomplete, Box, Button, ButtonGroup, IconButton, Typography } from '@mui/material';
 import Dialog from '@mui/material/Dialog';
 import DialogActions from '@mui/material/DialogActions';
@@ -7,6 +10,19 @@ import { Check, Plus, Trash2, X } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import api from '../utils/api';
 
+/**
+ * Formulario modal de receta en modo creacion o edicion.
+ *
+ * @param {{
+ *  modo: 'Nueva'|'Editar',
+ *  idReceta: number|null,
+ *  open: boolean,
+ *  onClose: () => void,
+ *  onSuccess: (modo: 'Nueva'|'Editar') => void,
+ *  ingredientesRecuperados: Array<{ nombre_ingrediente: string }>
+ * }} props - Datos de contexto para operar sobre recetas.
+ * @returns {JSX.Element}
+ */
 function DialogoReceta({ modo, idReceta, open, onClose, onSuccess, ingredientesRecuperados }) {
 	// Hay dos modos, "Nueva" y "Editar"
 	// Receta que se está editando o creando
@@ -69,7 +85,11 @@ function DialogoReceta({ modo, idReceta, open, onClose, onSuccess, ingredientesR
 		fetchDetalles();
 	}, [open, modo, idReceta]);
 
-	// Cuando cambia un campo del formulario se actualiza el estado
+	/**
+	 * Actualiza los campos base de receta (titulo, descripcion, dificultad).
+	 *
+	 * @param {import('react').ChangeEvent<HTMLInputElement>} e - Evento de input.
+	 */
 	const handleChange = e => {
 		setRecetaActual({ ...recetaActual, [e.target.name]: e.target.value });
 		// Limpiamos el error de este campo concreto cuando el usuario escribe
@@ -78,7 +98,13 @@ function DialogoReceta({ modo, idReceta, open, onClose, onSuccess, ingredientesR
 		}
 	};
 
-	// Añadir o modificar un ingrediente específico
+	/**
+	 * Actualiza un campo de un ingrediente en una fila concreta.
+	 *
+	 * @param {number} index - Posicion del ingrediente en el arreglo.
+	 * @param {'nombre_ingrediente'|'cantidad'|'unidad'} campo - Campo a actualizar.
+	 * @param {string|number} valor - Nuevo valor del campo.
+	 */
 	const handleChangeIngrediente = (index, campo, valor) => {
 		setIngredientes(prevIngredientes => {
 			// Creamos una copia del array para no mutar el estado directamente
@@ -89,17 +115,27 @@ function DialogoReceta({ modo, idReceta, open, onClose, onSuccess, ingredientesR
 		});
 	};
 
-	// Añadir una nueva fila de ingrediente en blanco
+	/**
+	 * Agrega una fila de ingrediente vacia al formulario.
+	 */
 	const handleAñadirIngrediente = () => {
 		setIngredientes([...ingredientes, { nombre_ingrediente: '', cantidad: '', unidad: '' }]);
 	};
 
-	// Eliminar un ingrediente (por si el usuario se equivoca al añadir de más)
+	/**
+	 * Elimina una fila de ingrediente por indice.
+	 *
+	 * @param {number} indexAEliminar - Posicion a eliminar.
+	 */
 	const handleEliminarIngrediente = indexAEliminar => {
 		setIngredientes(ingredientes.filter((_, index) => index !== indexAEliminar));
 	};
 
-	// Cuando se pulsa el botón de enviar, se ejecuta esta función
+	/**
+	 * Valida y envia la receta al backend en modo crear o editar.
+	 *
+	 * @returns {Promise<void>}
+	 */
 	const handleSubmit = async () => {
 		// Evitamos envíos duplicados por pulsar el botón tras el mensaje de inserción correcta
 		if (isUpdating) return;
@@ -141,6 +177,13 @@ function DialogoReceta({ modo, idReceta, open, onClose, onSuccess, ingredientesR
 	};
 
 	// Estilos de los botones de dificultad
+	/**
+	 * Genera estilos para los botones de dificultad segun seleccion actual.
+	 *
+	 * @param {'Fácil'|'Media'|'Difícil'} value - Valor del boton.
+	 * @param {string} color - Color principal del estado seleccionado.
+	 * @returns {Object}
+	 */
 	const getButtonStyle = (value, color) => {
 		const isSelected = recetaActual.dificultad === value;
 		return {
@@ -168,6 +211,11 @@ function DialogoReceta({ modo, idReceta, open, onClose, onSuccess, ingredientesR
 		};
 	};
 
+	/**
+	 * Ejecuta validaciones de receta e ingredientes antes de enviar.
+	 *
+	 * @returns {boolean} true si el formulario es valido.
+	 */
 	const validarDatos = () => {
 		const nuevosErrores = {};
 		// Validación del Título

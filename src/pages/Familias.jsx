@@ -1,3 +1,7 @@
+/**
+ * @fileoverview Gestion de familias del usuario:
+ * creacion, union, consulta de miembros, invitaciones y salida/eliminacion.
+ */
 import { Alert, Box, Button, Card, CardContent, Chip, Grid, Pagination, Stack, Typography, Zoom } from '@mui/material';
 import { grey } from '@mui/material/colors';
 import { Crown, Eye, LogOut, Plus, QrCode, Trash2, UserPlus, Users } from 'lucide-react';
@@ -8,6 +12,11 @@ import DialogoFamilia from '../components/DialogoFamilia';
 import DialogoVerMiembros from '../components/DialogoVerMiembros';
 import api from '../utils/api';
 
+/**
+ * Pagina principal de familias del usuario autenticado.
+ *
+ * @returns {JSX.Element}
+ */
 function Familias() {
 	// Recupera las familias del usuario
 	const [familiasRecuperadas, setFamiliasRecuperadas] = useState([]);
@@ -44,6 +53,11 @@ function Familias() {
 		nombreCreador: '',
 	});
 
+	/**
+	 * Callback de exito tras crear o unirse a una familia.
+	 *
+	 * @param {'Nueva'|'Unirme'} tipo - Accion completada en el dialogo.
+	 */
 	const onSuccess = tipo => {
 		setRecargarDatos(prev => !prev);
 		setOpenDialogFamilia(false);
@@ -56,7 +70,12 @@ function Familias() {
 		});
 	};
 
-	// Abre el dialog de Nueva/Editar/Eliminar receta
+	/**
+	 * Abre el dialogo correspondiente segun accion de usuario.
+	 *
+	 * @param {'Nueva'|'Unirme'|'Eliminar'|'Ver'|'Invitación'} tipo - Tipo de dialogo.
+	 * @param {Object|null} [familia=null] - Familia objetivo de la accion.
+	 */
 	const handleClickOpenDialog = (tipo, familia = null) => {
 		if (tipo === 'Nueva' || tipo === 'Unirme') {
 			setModoDialogo(tipo);
@@ -74,7 +93,11 @@ function Familias() {
 		}
 	};
 
-	// Actualiza el código de la familia activa cuando se genera uno nuevo
+	/**
+	 * Sincroniza el nuevo codigo de invitacion en el estado local y la lista paginada.
+	 *
+	 * @param {string} nuevoCodigoInvitacion - Codigo generado recientemente.
+	 */
 	const handleCodigoActualizado = (nuevoCodigoInvitacion) => {
 		// Actualizar familiaActiva
 		setFamiliaActiva(prev => ({
@@ -92,7 +115,11 @@ function Familias() {
 		);
 	};
 
-	// Cierra el dialog
+	/**
+	 * Cierra el dialogo indicado por tipo.
+	 *
+	 * @param {'Nueva'|'Unirme'|'Eliminar'|'Ver'|'Invitación'} tipo - Dialogo a cerrar.
+	 */
 	const handleCloseDialog = tipo => {
 		if (tipo === 'Nueva' || tipo === 'Unirme') {
 			setOpenDialogFamilia(false);
@@ -122,6 +149,12 @@ function Familias() {
 		cargarDatosPreliminares();
 	}, [recargarDatos, paginaActual]);
 
+	/**
+	 * Elimina la familia (si es admin) o abandona la familia (si es miembro).
+	 * Actualiza estado local y feedback visual.
+	 *
+	 * @returns {Promise<void>}
+	 */
 	async function handleDelete() {
 		setIsUpdating(true); // Bloqueamos los botones al iniciar
 		try {

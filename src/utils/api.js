@@ -1,8 +1,22 @@
+/**
+ * @fileoverview Cliente HTTP centralizado para el frontend.
+ * Incluye configuracion base y manejo uniforme de errores.
+ */
 import axios from 'axios';
 import useAuthStore from '../store/authStore';
 
+/**
+ * URL base de backend inyectada por Vite.
+ *
+ * @type {string|undefined}
+ */
 const API_URL = import.meta.env.VITE_API_URL;
 
+/**
+ * Instancia compartida de Axios para todas las peticiones de la app.
+ *
+ * @type {import('axios').AxiosInstance}
+ */
 const api = axios.create({
   baseURL: API_URL,
   timeout: 5000,
@@ -12,6 +26,7 @@ const api = axios.create({
 });
 
 // --- INTERCEPTOR REQUEST (Salida) ---
+// Inyecta automaticamente el token JWT en cada request autenticada.
 api.interceptors.request.use((config) => {
   // Leemos el token directamente de Zustand
   const token = useAuthStore.getState().token;
@@ -24,6 +39,8 @@ api.interceptors.request.use((config) => {
 });
 
 // --- INTERCEPTOR RESPONSE (Llegada) ---
+// Normaliza la salida para que la app consuma directamente response.data
+// y convierte errores de red/servidor en una estructura comun.
 api.interceptors.response.use(
   (response) => {
     // Si la respuesta es exitosa, retornamos los datos

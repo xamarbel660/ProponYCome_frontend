@@ -1,3 +1,7 @@
+/**
+ * @fileoverview Configuracion principal de la aplicacion:
+ * rutas, guardias de acceso y proveedor de tema MUI.
+ */
 import { createBrowserRouter, Navigate } from 'react-router';
 import { RouterProvider } from 'react-router/dom';
 import AuthPage from './pages/AuthPage';
@@ -12,21 +16,37 @@ import useAuthStore from './store/authStore';
 import useThemeStore from './store/useThemeStore';
 import { createTheme, CssBaseline, ThemeProvider } from '@mui/material';
 
-// GUARDIA PRIVADO: Solo deja pasar si estás logueado
+/**
+ * Protege rutas privadas: redirige a login si no hay sesion activa.
+ *
+ * @param {{ children: import('react').ReactNode }} props - Contenido protegido.
+ * @returns {JSX.Element}
+ */
 const RutaPrivada = ({ children }) => {
 	const isAuth = useAuthStore(state => state.isAuth);
 	// Si NO está logueado, patada al Login
 	return isAuth ? children : <Navigate to="/login" replace />;
 };
 
-// GUARDIA PÚBLICO: Solo deja pasar si NO estás logueado
-// Para que si ya estás dentro, no veas el Login otra vez
+/**
+ * Protege rutas publicas: si el usuario ya inicio sesion,
+ * evita volver al login y lo redirige al inicio.
+ *
+ * @param {{ children: import('react').ReactNode }} props - Contenido publico.
+ * @returns {JSX.Element}
+ */
 const RutaPublica = ({ children }) => {
 	const isAuth = useAuthStore(state => state.isAuth);
 	// Si YA está logueado, mándalo directo a casa
 	return isAuth ? <Navigate to="/" replace /> : children;
 };
 
+/**
+ * Router central de la aplicacion.
+ * Define un grupo de rutas publicas y otro privado bajo Home.
+ *
+ * @type {import('react-router').Router}
+ */
 const router = createBrowserRouter([
 	// -----------------------------------------------------------------
 	// GRUPO 1: RUTAS PÚBLICAS (Sin Menú/Navbar)

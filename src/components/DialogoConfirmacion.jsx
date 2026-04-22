@@ -1,6 +1,24 @@
+/**
+ * @fileoverview Dialogo de confirmacion reutilizable para acciones destructivas.
+ */
 import { Box, Button, Dialog, DialogActions, Typography } from '@mui/material';
 import { Trash2, X } from 'lucide-react';
 
+/**
+ * Dialogo generico de confirmacion con botones confirmar/cancelar.
+ *
+ * @param {{
+ *  open: boolean,
+ *  onClose: () => void,
+ *  onConfirm: () => void,
+ *  titulo: string,
+ *  mensaje: string,
+ *  isProcessing?: boolean,
+ *  confirmText?: string,
+ *  cancelText?: string
+ * }} props - Configuracion del dialogo y callbacks.
+ * @returns {JSX.Element}
+ */
 function DialogoConfirmacion({
 	open,
 	onClose,

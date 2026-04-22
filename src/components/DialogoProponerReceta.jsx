@@ -1,15 +1,34 @@
-import { Autocomplete, Button, Dialog, DialogContent, DialogTitle, TextField, Typography } from "@mui/material"
-import { formatearFechaAmigable } from "../utils/diasSemana"
+/**
+ * @fileoverview Dialogo para proponer una receta en un turno/dia del planning.
+ */
+import { Autocomplete, Button, Card, Dialog, DialogContent, DialogTitle, TextField, Typography } from "@mui/material";
 import { useEffect, useState } from "react";
 import api from "../utils/api";
+import { formatearFechaAmigable } from "../utils/formatosFechas";
 
 
+/**
+ * Dialogo de seleccion y envio de propuesta de receta al planning familiar.
+ *
+ * @param {{
+ *  open: boolean,
+ *  onClose: () => void,
+ *  dia: Date,
+ *  turno: string,
+ *  recetasRecuperadas: Array<any>,
+ *  cargarRecetasUsuario: () => Promise<void>|undefined,
+ *  familiaSeleccionada: number|string,
+ *  onPropuestaCreada?: () => Promise<void>|void
+ * }} props - Datos necesarios para crear la propuesta.
+ * @returns {JSX.Element}
+ */
 function DialogoProponerReceta({ open, onClose, dia, turno, recetasRecuperadas, cargarRecetasUsuario, familiaSeleccionada, onPropuestaCreada }) {
     const [isUpdating, setIsUpdating] = useState(false);
     const [errorFormulario, setErrorFormulario] = useState('');
 
     // Receta seleccionada para proponer
     const [recetaSeleccionada, setRecetaSeleccionada] = useState(null);
+    const [inputReceta, setInputReceta] = useState('');
 
     // Cargamos las recetas del usuario
     useEffect(() => {
@@ -18,10 +37,17 @@ function DialogoProponerReceta({ open, onClose, dia, turno, recetasRecuperadas, 
         }
 
         setErrorFormulario('');
+        setRecetaSeleccionada(null);
+        setInputReceta('');
         cargarRecetasUsuario();
     }, [open, cargarRecetasUsuario]);
 
-    // Evita errores por zona horaria al convertir Date -> YYYY-MM-DD
+    /**
+     * Serializa una fecha local en formato YYYY-MM-DD para backend.
+     *
+     * @param {Date} fecha - Fecha a formatear.
+     * @returns {string}
+     */
     const formatearFechaApi = (fecha) => {
         const y = fecha.getFullYear();
         const m = String(fecha.getMonth() + 1).padStart(2, '0');
@@ -29,8 +55,11 @@ function DialogoProponerReceta({ open, onClose, dia, turno, recetasRecuperadas, 
         return `${y}-${m}-${d}`;
     };
 
-    // Enviamos la propuesta al backend
-    // Cuando se pulsa el botón de actualizar código, se ejecuta esta función
+    /**
+     * Envia la propuesta de receta seleccionada al backend.
+     *
+     * @returns {Promise<void>}
+     */
     const handleSubmit = async () => {
         // Evitamos envíos duplicados por pulsar el botón tras el mensaje de inserción correcta
         if (isUpdating) return;
@@ -55,6 +84,7 @@ function DialogoProponerReceta({ open, onClose, dia, turno, recetasRecuperadas, 
         try {
             await api.post(`/planning/new`, { 'propuesta': payload });
             setRecetaSeleccionada(null);
+            setInputReceta('');
             onClose();
             if (onPropuestaCreada) {
                 await onPropuestaCreada();
@@ -74,8 +104,7 @@ function DialogoProponerReceta({ open, onClose, dia, turno, recetasRecuperadas, 
             bgcolor: 'action.hover',
             borderRadius: '12px',
         },
-        mb: 2,
-        mt: 2
+        my: 2
     };
 
     return (
@@ -89,24 +118,37 @@ function DialogoProponerReceta({ open, onClose, dia, turno, recetasRecuperadas, 
                     <Typography variant="h6" sx={{ fontWeight: 'bold' }}>
                         Proponer Comida
                     </Typography>
-                    <Typography variant="caption" sx={{ fontWeight: 'bold' }}>
+                    <Typography variant="body2" sx={{ fontWeight: 'bold' }}>
                         Propón una comida para el {turno} del día {formatearFechaAmigable(dia)}
                     </Typography>
                 </DialogTitle>
                 <DialogContent>
                     <Typography variant="body1">
-                        Selecciona una receta de tu cuaderno.
+                        Selecciona una receta de tu cuaderno:
                     </Typography>
 
                     {/* Busqueda de recetas */}
                     <Autocomplete
                         options={recetasRecuperadas || []}
                         value={recetaSeleccionada}
+                        inputValue={inputReceta}
                         onChange={(event, newValue) => {
                             setRecetaSeleccionada(newValue);
+                            setInputReceta(newValue?.titulo || '');
                             setErrorFormulario('');
                         }}
-                        getOptionLabel={(option) => option?.titulo || ''}
+                        onInputChange={(event, newInputValue, reason) => {
+                            setInputReceta(newInputValue);
+
+                            // Si se limpia el texto, también se limpia la selección para deshabilitar el botón.
+                            if (reason === 'clear' || newInputValue === '') {
+                                setRecetaSeleccionada(null);
+                            }
+                        }}
+                        getOptionLabel={(option) => {
+                            if (typeof option === 'string') return option;
+                            return option?.titulo || '';
+                        }}
                         isOptionEqualToValue={(option, value) => option.id_receta === value?.id_receta}
                         renderInput={params => (
                             <TextField
@@ -115,10 +157,6 @@ function DialogoProponerReceta({ open, onClose, dia, turno, recetasRecuperadas, 
                                 size="small"
                                 fullWidth
                                 sx={inputStyles}
-                                InputProps={{
-                                    ...params.InputProps,
-                                    type: 'search'
-                                }}
                             />
                         )}
                     />
@@ -128,6 +166,24 @@ function DialogoProponerReceta({ open, onClose, dia, turno, recetasRecuperadas, 
                             {errorFormulario}
                         </Typography>
                     )}
+
+                    {recetaSeleccionada && (
+                        <Card sx={{ p: 2, mt: 1, mb: 2, borderRadius: '12px' }}>
+                            <Typography variant="subtitle1" sx={{ fontWeight: 'bold' }}>
+                                {recetaSeleccionada.titulo || 'Sin titulo'}
+                            </Typography>
+                            <Typography variant="body2" sx={{ mt: 1 }}>
+                                {recetaSeleccionada.descripcion || 'Sin descripcion disponible.'}
+                            </Typography>
+                            <Typography variant="caption" sx={{ display: 'block', mt: 1 }}>
+                                Dificultad: {recetaSeleccionada.dificultad || 'No especificada'}
+                            </Typography>
+                            <Typography variant="caption" sx={{ display: 'block', mt: 0.5 }}>
+                                Ingredientes: {recetaSeleccionada.cantidadIngredientes ?? 'No especificado'}
+                            </Typography>
+                        </Card>
+                    )}
+
 
                     {/* Botón para enviar la propuesta */}
                     <Button

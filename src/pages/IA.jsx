@@ -1,3 +1,7 @@
+/**
+ * @fileoverview Asistente de recetas con IA.
+ * Permite sugerir recetas por ingredientes y guardarlas en el cuaderno.
+ */
 import { Alert, Box, Button, Card, CardActions, CardContent, Chip, CircularProgress, Grid, IconButton, Stack, TextField, Typography, Zoom } from '@mui/material';
 import { BookPlus, Check, Eye, Send, Sparkles } from 'lucide-react';
 import { useEffect, useState } from 'react';
@@ -10,6 +14,11 @@ const mensajesCargando = [
 	'Creando recetas únicas...'
 ];
 
+/**
+ * Pantalla de sugerencias de recetas generadas por IA.
+ *
+ * @returns {JSX.Element}
+ */
 function IA() {
 	const [ingredientesIA, setIngredientesIA] = useState('');
 	const [openDialogVerReceta, setOpenDialogVerReceta] = useState(false);
@@ -40,7 +49,11 @@ function IA() {
 		return () => clearInterval(intervalId);
 	}, [isUpdating]);
 
-	// Cuando se pulsa el botón de enviar, se ejecuta esta función
+	/**
+	 * Envia ingredientes al backend de IA y carga las recetas sugeridas.
+	 *
+	 * @returns {Promise<void>}
+	 */
 	const handleSubmit = async () => {
 		// Evitamos envíos duplicados por pulsar el botón tras el mensaje de inserción correcta
 		if (isUpdating) return;
@@ -94,6 +107,17 @@ function IA() {
 		}
 	};
 
+	/**
+	 * Guarda una receta sugerida en el cuaderno del usuario.
+	 *
+	 * @param {{
+	 *  titulo: string,
+	 *  descripcion: string,
+	 *  dificultad: string,
+	 *  ingredientes: Array<any>
+	 * }} receta - Receta sugerida por IA.
+	 * @returns {Promise<void>}
+	 */
 	const handleAñadirReceta = async (receta) => {
 		if (recetasAñadidas.includes(receta.titulo)) return;
 		if (añadiendoReceta) return;
@@ -139,17 +163,31 @@ function IA() {
 
 	};
 
-	// Cuando cambia un campo del formulario se actualiza el estado
+	/**
+	 * Actualiza el input de ingredientes en bruto.
+	 *
+	 * @param {import('react').ChangeEvent<HTMLInputElement>} e - Evento de input.
+	 */
 	const handleChange = e => {
 		setIngredientesIA(e.target.value);
 	};
 
-	// Abre el dialog de Ver receta
+	/**
+	 * Abre el dialogo de detalle para una receta sugerida.
+	 *
+	 * @param {Object} receta - Receta activa para vista detallada.
+	 */
 	const handleClickOpenDialog = receta => {
 		setRecetaActiva(receta);
 		setOpenDialogVerReceta(true);
 	};
 
+	/**
+	 * Extrae un nombre de ingrediente desde distintos formatos de respuesta.
+	 *
+	 * @param {string|Object} ingrediente - Elemento de ingrediente heterogeneo.
+	 * @returns {string} Nombre normalizado o cadena vacia.
+	 */
 	const obtenerNombreIngrediente = ingrediente => {
 		if (typeof ingrediente === 'string') return ingrediente;
 		if (ingrediente && typeof ingrediente === 'object') {

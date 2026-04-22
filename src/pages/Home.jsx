@@ -1,3 +1,7 @@
+/**
+ * @fileoverview Layout principal de la zona privada.
+ * Incluye cabecera, contenido anidado y navegacion inferior.
+ */
 import { SafeArea } from '@capacitor-community/safe-area';
 import {
 	AppBar,
@@ -27,6 +31,11 @@ import { Outlet, useLocation, useNavigate } from 'react-router';
 import useAuthStore from '../store/authStore';
 import Configuracion from '../components/Configuracion';
 
+/**
+ * Contenedor principal de la aplicacion autenticada.
+ *
+ * @returns {JSX.Element}
+ */
 function Home() {
 	const user = useAuthStore(state => state.user); // Leemos el usuario
 
@@ -52,7 +61,12 @@ function Home() {
 		configurarSafeAreas();
 	}, []);
 
-	// Función para cambiar de ruta con los botones de abajo
+	/**
+	 * Navega a la ruta asociada al boton de la barra inferior.
+	 *
+	 * @param {import('react').SyntheticEvent} event - Evento de seleccion.
+	 * @param {string} newValue - Ruta destino.
+	 */
 	const handleNavegacion = (event, newValue) => {
 		navigate(newValue);
 	};

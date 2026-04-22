@@ -1,3 +1,6 @@
+/**
+ * @fileoverview Dialogo para visualizar miembros de familia y gestionar permisos.
+ */
 import { Alert, Box, Button, Chip, IconButton, Typography } from '@mui/material';
 import Dialog from '@mui/material/Dialog';
 import DialogContent from '@mui/material/DialogContent';
@@ -6,13 +9,23 @@ import { useCallback, useEffect, useState } from 'react';
 import api from '../utils/api';
 import DialogoConfirmacion from './DialogoConfirmacion';
 
-// Dialogo para ver los miembros de la familia
+/**
+ * Dialogo de miembros con acciones administrativas (rol y expulsion).
+ *
+ * @param {{ open: boolean, onClose: () => void, idFamilia: number|string|null }} props - Control del dialogo.
+ * @returns {JSX.Element}
+ */
 function DialogoVerMiembros({ open, onClose, idFamilia }) {
     const [familia, setFamilia] = useState(null);
     const [accionEnCurso, setAccionEnCurso] = useState(null);
     const [miembroAExpulsar, setMiembroAExpulsar] = useState(null);
     const [feedback, setFeedback] = useState({ tipo: '', mensaje: '' });
 
+    /**
+     * Recupera informacion de la familia y listado actualizado de miembros.
+     *
+     * @returns {Promise<void>}
+     */
     const fetchFamilia = useCallback(async () => {
         try {
             const response = await api.post(`/familias/${idFamilia}`);
@@ -37,6 +50,13 @@ function DialogoVerMiembros({ open, onClose, idFamilia }) {
         }
     }, [open]);
 
+    /**
+     * Otorga o revoca permisos de administrador a un miembro.
+     *
+     * @param {number|string} idUsuarioObjetivo - Usuario objetivo.
+     * @param {boolean} esAdministrador - Estado deseado de rol admin.
+     * @returns {Promise<void>}
+     */
     const cambiarRolAdmin = async (idUsuarioObjetivo, esAdministrador) => {
         if (!idFamilia) return;
 
@@ -57,6 +77,11 @@ function DialogoVerMiembros({ open, onClose, idFamilia }) {
         }
     };
 
+    /**
+     * Expulsa al miembro seleccionado de la familia.
+     *
+     * @returns {Promise<void>}
+     */
     const expulsarMiembro = async () => {
         if (!miembroAExpulsar?.id_usuario) return;
         if (!idFamilia) return;

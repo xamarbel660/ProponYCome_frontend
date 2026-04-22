@@ -1,3 +1,7 @@
+/**
+ * @fileoverview Gestion del cuaderno de recetas del usuario.
+ * Incluye listado paginado, creacion, edicion, borrado y vista de detalle.
+ */
 import {
 	Alert,
 	Box,
@@ -19,6 +23,11 @@ import DialogoReceta from '../components/DialogoCrearReceta';
 import api from '../utils/api';
 import DialogoVerReceta from '../components/DialogoVerReceta';
 
+/**
+ * Pagina principal de recetas del usuario.
+ *
+ * @returns {JSX.Element}
+ */
 function Recetas() {
 	// Recupera las recetas del usuario
 	const [recetasRecuperadas, setRecetasRecuperadas] = useState([]);
@@ -49,6 +58,11 @@ function Recetas() {
 	const [idRecetaActiva, setIdRecetaActiva] = useState(null);
 	const recetaActiva = recetasRecuperadas.find(receta => receta.id_receta === idRecetaActiva) || null;
 
+	/**
+	 * Callback de exito cuando una receta se crea o actualiza desde el dialogo.
+	 *
+	 * @param {'Nueva'|'Editar'} tipo - Operacion completada.
+	 */
 	const onSuccess = tipo => {
 		setRecargarDatos(prev => !prev);
 		setOpenDialogReceta(false);
@@ -61,7 +75,12 @@ function Recetas() {
 		});
 	};
 
-	// Abre el dialog de Nueva/Editar/Eliminar receta
+	/**
+	 * Abre el dialogo adecuado segun accion sobre una receta.
+	 *
+	 * @param {'Nueva'|'Editar'|'Eliminar'|'Ver'} tipo - Dialogo a abrir.
+	 * @param {number|null} [id=null] - Identificador de receta objetivo.
+	 */
 	const handleClickOpenDialog = (tipo, id = null) => {
 		setIdRecetaActiva(id);
 		if (tipo === 'Nueva' || tipo === 'Editar') {
@@ -74,7 +93,11 @@ function Recetas() {
 		}
 	};
 
-	// Cierra el dialog
+	/**
+	 * Cierra el dialogo indicado por tipo.
+	 *
+	 * @param {'Nueva'|'Editar'|'Eliminar'|'Ver'} tipo - Dialogo a cerrar.
+	 */
 	const handleCloseDialog = tipo => {
 		if (tipo === 'Nueva' || tipo === 'Editar') {
 			setOpenDialogReceta(false);
@@ -108,6 +131,11 @@ function Recetas() {
 		cargarDatosPreliminares();
 	}, [recargarDatos, paginaActual]);
 
+	/**
+	 * Elimina la receta activa y refresca el listado local.
+	 *
+	 * @returns {Promise<void>}
+	 */
 	async function handleDelete() {
 		setIsUpdating(true); // Bloqueamos los botones al iniciar
 		try {

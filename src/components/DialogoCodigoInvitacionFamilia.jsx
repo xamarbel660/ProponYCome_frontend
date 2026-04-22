@@ -1,3 +1,6 @@
+/**
+ * @fileoverview Dialogo para visualizar, copiar y regenerar codigo de invitacion familiar.
+ */
 import { Box, Button, IconButton, Typography, Alert } from '@mui/material';
 import Dialog from '@mui/material/Dialog';
 import DialogContent from '@mui/material/DialogContent';
@@ -7,6 +10,20 @@ import { useState, useEffect } from 'react';
 import api from '../utils/api';
 import { Clipboard as ClipboardAPI } from '@capacitor/clipboard';
 
+/**
+ * Dialogo de gestion de codigo de invitacion de una familia.
+ *
+ * @param {{
+ *  open: boolean,
+ *  onClose: () => void,
+ *  esAdmin: boolean,
+ *  nombreFamilia: string,
+ *  codigoInvitacion: string,
+ *  idFamilia: number|string,
+ *  onCodigoActualizado?: (codigo: string) => void
+ * }} props - Estado, datos de familia y callbacks.
+ * @returns {JSX.Element}
+ */
 function DialogoCodigoInvitacion({ open, onClose, esAdmin, nombreFamilia, codigoInvitacion, idFamilia, onCodigoActualizado }) {
     // Indica si se está procesando el envío
     const [isUpdating, setIsUpdating] = useState(false);
@@ -24,7 +41,11 @@ function DialogoCodigoInvitacion({ open, onClose, esAdmin, nombreFamilia, codigo
         }
     }, [open, codigoInvitacion]);
 
-    // Cuando se pulsa el botón de actualizar código, se ejecuta esta función
+    /**
+     * Solicita al backend la regeneracion del codigo de invitacion.
+     *
+     * @returns {Promise<void>}
+     */
     const handleSubmit = async () => {
         // Evitamos envíos duplicados por pulsar el botón tras el mensaje de inserción correcta
         if (isUpdating) return;
@@ -62,6 +83,12 @@ function DialogoCodigoInvitacion({ open, onClose, esAdmin, nombreFamilia, codigo
         },
     };
 
+    /**
+     * Copia el codigo actual al portapapeles.
+     * Prioriza plugin de Capacitor y usa navegador como fallback.
+     *
+     * @returns {Promise<void>}
+     */
     const writeToClipboard = async () => {
         try {
             await ClipboardAPI.write({

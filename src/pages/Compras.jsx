@@ -1,3 +1,13 @@
+/**
+ * @fileoverview Pantalla base de lista de compras.
+ * Actualmente actua como placeholder para futuras funcionalidades.
+ */
+
+/**
+ * Vista inicial de la seccion de compras.
+ *
+ * @returns {JSX.Element}
+ */
 function Compras() {
 	return (
 		<div>

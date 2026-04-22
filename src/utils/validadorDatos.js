@@ -1,7 +1,24 @@
+/**
+ * @fileoverview Validaciones de formularios de autenticacion.
+ * Proporciona funciones para login y registro con mensajes de UI.
+ */
+
 // Validaciones de los datos de login y registro
 
 // Regex para validar el email
 const regex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+/**
+ * Valida el formulario de inicio de sesion.
+ *
+ * @param {{ email: string, password_hash: string }} usuarioLogin - Datos de login.
+ * @returns {[boolean, {
+ *  email: boolean,
+ *  password_hash: boolean,
+ *  mensajeEmailError: string,
+ *  mensajePasswordError: string
+ * }]} Resultado de validacion y detalle por campo.
+ */
 function validarDatosLogin(usuarioLogin) {
 	let valido = true;
 	let objetoValidacion = {
@@ -35,6 +52,19 @@ function validarDatosLogin(usuarioLogin) {
 	return [valido, objetoValidacion];
 }
 
+/**
+ * Valida el formulario de registro.
+ *
+ * @param {{ nombre: string, email: string, password_hash: string }} usuarioRegister - Datos de registro.
+ * @returns {[boolean, {
+ *  nombre: boolean,
+ *  email: boolean,
+ *  password_hash: boolean,
+ *  mensajeNombreError: string,
+ *  mensajeEmailError: string,
+ *  mensajePasswordError: string
+ * }]} Resultado de validacion y detalle por campo.
+ */
 function validarDatosRegister(usuarioRegister) {
 	let valido = true;
 	let objetoValidacion = {

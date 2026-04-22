@@ -1,3 +1,7 @@
+/**
+ * @fileoverview Pantalla de autenticacion.
+ * Permite iniciar sesion o registrar usuario y guarda la sesion en Zustand.
+ */
 import Visibility from '@mui/icons-material/Visibility';
 import VisibilityOff from '@mui/icons-material/VisibilityOff';
 import {
@@ -25,6 +29,11 @@ import useAuthStore from '../store/authStore';
 import api from '../utils/api';
 import { validarDatosLogin, validarDatosRegister } from '../utils/validadorDatos';
 
+/**
+ * Pantalla de acceso principal (login/registro).
+ *
+ * @returns {JSX.Element}
+ */
 function AuthPage() {
 	const navigate = useNavigate();
 	// Recuperamos la función login del store
@@ -95,17 +104,28 @@ function AuthPage() {
 		return () => clearTimeout(timer);
 	}, [error]);
 
-	// Función para manejar los parámetros del login
+	/**
+	 * Actualiza los campos del formulario de login.
+	 *
+	 * @param {import('react').ChangeEvent<HTMLInputElement>} e - Evento de input.
+	 */
 	function handleLogin(e) {
 		setUsuarioLogin({ ...usuarioLogin, [e.target.name]: e.target.value });
 	}
 
-	// Función para manejar los parámetros del registro
+	/**
+	 * Actualiza los campos del formulario de registro.
+	 *
+	 * @param {import('react').ChangeEvent<HTMLInputElement>} e - Evento de input.
+	 */
 	function handleRegister(e) {
 		setUsuarioRegister({ ...usuarioRegister, [e.target.name]: e.target.value });
 	}
 
-	// Función para manejar el click en el botón de login o registro
+	/**
+	 * Dispara la validacion y envio del formulario activo.
+	 * Previene dobles envios si ya hay una peticion en curso.
+	 */
 	function handleClick() {
 		// evitar envíos duplicados por pulsar el botón tras el mensaje de inserción correcta
 		if (isUpdating) return;
@@ -135,12 +155,25 @@ function AuthPage() {
 
 	const [showPassword, setShowPassword] = useState(false);
 
+	/**
+	 * Alterna la visibilidad de la contrasena.
+	 */
 	const handleClickShowPassword = () => setShowPassword(show => !show);
 
+	/**
+	 * Evita que el boton de mostrar contrasena robe el foco del input.
+	 *
+	 * @param {import('react').MouseEvent<HTMLButtonElement>} event
+	 */
 	const handleMouseDownPassword = event => {
 		event.preventDefault();
 	};
 
+	/**
+	 * Evita comportamiento por defecto al soltar el click.
+	 *
+	 * @param {import('react').MouseEvent<HTMLButtonElement>} event
+	 */
 	const handleMouseUpPassword = event => {
 		event.preventDefault();
 	};

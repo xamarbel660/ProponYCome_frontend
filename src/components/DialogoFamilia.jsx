@@ -1,3 +1,6 @@
+/**
+ * @fileoverview Dialogo para crear familia o unirse mediante codigo.
+ */
 import { Box, Button, IconButton, Typography } from '@mui/material';
 import Dialog from '@mui/material/Dialog';
 import DialogActions from '@mui/material/DialogActions';
@@ -7,6 +10,17 @@ import { Check, X } from 'lucide-react';
 import { useState } from 'react';
 import api from '../utils/api';
 
+/**
+ * Formulario modal de familias en modo "Nueva" o "Unirme".
+ *
+ * @param {{
+ *  modo: 'Nueva'|'Unirme',
+ *  open: boolean,
+ *  onClose: () => void,
+ *  onSuccess: (modo: 'Nueva'|'Unirme') => void
+ * }} props - Configuracion del dialogo y callback de exito.
+ * @returns {JSX.Element}
+ */
 function DialogoFamilia({ modo, open, onClose, onSuccess }) {
     // Hay dos modos, "Nueva" y "Unirme"
     // Familia que se está creando
@@ -21,7 +35,11 @@ function DialogoFamilia({ modo, open, onClose, onSuccess }) {
     // Indica si hay errores en el formulario
     const [errores, setErrores] = useState({});
 
-    // Cuando cambia un campo del formulario se actualiza el estado
+    /**
+     * Actualiza el estado del formulario para crear familia.
+     *
+     * @param {import('react').ChangeEvent<HTMLInputElement>} e - Evento de input.
+     */
     const handleChange = e => {
         setFamiliaActual({ ...familiaActual, [e.target.name]: e.target.value });
         // Limpiamos el error de este campo concreto cuando el usuario escribe
@@ -30,7 +48,11 @@ function DialogoFamilia({ modo, open, onClose, onSuccess }) {
         }
     };
 
-    // Cuando se pulsa el botón de enviar, se ejecuta esta función
+    /**
+     * Ejecuta validacion y envia la accion correspondiente (crear/unirse).
+     *
+     * @returns {Promise<void>}
+     */
     const handleSubmit = async () => {
         // Evitamos envíos duplicados por pulsar el botón tras el mensaje de inserción correcta
         if (isUpdating) return;
@@ -65,7 +87,11 @@ function DialogoFamilia({ modo, open, onClose, onSuccess }) {
         },
     };
 
-    // Función que valida los datos del formulario. Devuelve true si todo es correcto, o false si hay errores (y en ese caso actualiza el estado 'errores' para mostrar los mensajes)
+    /**
+     * Valida campos del formulario segun el modo actual.
+     *
+     * @returns {boolean} true si el formulario es valido.
+     */
     const validarDatos = () => {
         const nuevosErrores = {};
         if (modo === 'Nueva') {

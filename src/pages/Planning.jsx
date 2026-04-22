@@ -1,5 +1,10 @@
+/**
+ * @fileoverview Planificador semanal por familia.
+ * Permite navegar semanas, cargar propuestas y delegar acciones por turno.
+ */
 import {
 	Box,
+	Card,
 	FormControl,
 	IconButton,
 	InputLabel,
@@ -12,9 +17,20 @@ import { MoveLeft, MoveRight } from 'lucide-react';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import CardDiaSemanalPlanning from '../components/CardDiaSemanalPlanning';
 import api from '../utils/api';
-import { formatearFechaAmigable, obtenerLimitesSemana } from '../utils/diasSemana';
+import { formatearFechaAmigable, obtenerLimitesSemana, formatearFechaApi } from '../utils/formatosFechas';
 const LIMITE_SEMANAS = 5;
 
+const esMismoDia = (fechaA, fechaB) => (
+	fechaA.getFullYear() === fechaB.getFullYear() &&
+	fechaA.getMonth() === fechaB.getMonth() &&
+	fechaA.getDate() === fechaB.getDate()
+);
+
+/**
+ * Vista de planning semanal de comidas por familia.
+ *
+ * @returns {JSX.Element}
+ */
 function Planning() {
 	// Familias del usuario
 	const [familiasRecuperadas, setFamiliasRecuperadas] = useState([]);
@@ -27,6 +43,8 @@ function Planning() {
 	const [recetasRecuperadas, setRecetasRecuperadas] = useState([]);
 	const recetasCargadasRef = useRef(false);
 	const recetasRequestRef = useRef(null);
+	const cardHoyRef = useRef(null);
+	const [debeScrollAHoy, setDebeScrollAHoy] = useState(false);
 	// Fecha actual para calcular la semana que se muestra
 	const [fechaBase, setFechaBase] = useState(new Date());
 	// Desplazamiento en semanas respecto a la fecha actual (puede ser negativo, positivo o 0)
@@ -34,8 +52,8 @@ function Planning() {
 	// Calculo de los límites de la semana (lunes y domingo) a partir de la fecha base
 	const { lunes, domingo } = obtenerLimitesSemana(fechaBase);
 	// Strings para enviar a la API y mostrar en el título de la semana
-	const inicioStr = lunes.toISOString().split('T')[0];
-	const finStr = domingo.toISOString().split('T')[0];
+	const inicioStr = formatearFechaApi(lunes);
+	const finStr = formatearFechaApi(domingo);
 
 	// Guardamos si el usuario es administrador de la familia para mostrarle o no ciertas opciones en el planning
 	const [esAdminFamilia, setEsAdminFamilia] = useState(false);
@@ -54,7 +72,9 @@ function Planning() {
 		diasDeLaSemana.push(dia);
 	}
 
-	// Funcion para navegar una semana hacia atrás
+	/**
+	 * Mueve la vista una semana hacia atras respetando limite configurado.
+	 */
 	const irSemanaAnterior = () => {
 		if (!puedeIrSemanaAnterior) {
 			return;
@@ -68,7 +88,9 @@ function Planning() {
 		setDesplazamientoSemana((anterior) => anterior - 1);
 	};
 
-	// Funcion para navegar una semana hacia adelante
+	/**
+	 * Mueve la vista una semana hacia delante respetando limite configurado.
+	 */
 	const irSemanaSiguiente = () => {
 		if (!puedeIrSemanaSiguiente) {
 			return;
@@ -123,10 +145,32 @@ function Planning() {
 		planningDeLaFamilia();
 	}, [familiaSeleccionada, inicioStr, finStr, refreshPlanningKey]);
 
+	useEffect(() => {
+		if (!familiaSeleccionada || !debeScrollAHoy) {
+			return;
+		}
+
+		const frameId = requestAnimationFrame(() => {
+			cardHoyRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+			setDebeScrollAHoy(false);
+		});
+
+		return () => cancelAnimationFrame(frameId);
+	}, [familiaSeleccionada, inicioStr, debeScrollAHoy]);
+
+	/**
+	 * Fuerza recarga del planning incrementando la clave de refresco.
+	 */
 	const refrescarPlanning = () => {
 		setRefreshPlanningKey((anterior) => anterior + 1);
 	};
 
+	/**
+	 * Carga las recetas del usuario una unica vez por ciclo de sesion.
+	 * Evita peticiones duplicadas concurrentes usando una promesa compartida.
+	 *
+	 * @returns {Promise<void>|undefined}
+	 */
 	const cargarRecetasUsuario = useCallback(async () => {
 		if (recetasCargadasRef.current) {
 			return;
@@ -152,10 +196,18 @@ function Planning() {
 		return recetasRequestRef.current;
 	}, []);
 
+	/**
+	 * Cambia la familia activa y recalcula permisos del usuario.
+	 *
+	 * @param {import('react').ChangeEvent<{ value: unknown }>} event - Cambio del selector.
+	 */
 	const handleChange = (event) => {
 		setPlanningFamilia([]);
+		setFechaBase(new Date());
+		setDesplazamientoSemana(0);
 		setFamiliaSeleccionada(event.target.value);
 		setEsAdminFamilia(familiasRecuperadas.find(f => f.id_familia === event.target.value)?.es_admin || false);
+		setDebeScrollAHoy(true);
 	};
 
 	return (
@@ -174,9 +226,14 @@ function Planning() {
 							<Typography variant="subtitle2" color="text.secondary">
 								Organiza las comidas de la semana
 							</Typography>
+							{familiasRecuperadas.length === 0 && (
+								<Typography variant="body2" color="error.main" sx={{ mt: 1 }}>
+									No estás en ninguna familia. Únete o crea una para empezar a planificar tus comidas.
+								</Typography>
+							)}
 
 							{/* Familias del usuario */}
-							<FormControl variant="outlined" sx={{ mt: 2, minWidth: 120 }}>
+							<FormControl variant="outlined" sx={{ mt: 2, minWidth: 120 }} disabled={familiasRecuperadas.length === 0}>
 								<InputLabel id="FamiliaUsuario">Selecciona una familia</InputLabel>
 								<Select
 									labelId="FamiliaUsuario"
@@ -214,7 +271,7 @@ function Planning() {
 							<Stack spacing={3} sx={{ mt: 3 }}>
 								{diasDeLaSemana.map((diaObj, index) => {
 									// Convertimos la fecha (Date object) a "YYYY-MM-DD" para poder compararla con el JSON de la BD
-									const fechaString = diaObj.toISOString().split('T')[0];
+									const fechaString = formatearFechaApi(diaObj);
 
 									// Sacamos solo los que coincidan con la fecha de esta tarjeta (Lunes, martes, ...)
 									const propuestasDelDia = planningFamilia.filter(
@@ -222,17 +279,22 @@ function Planning() {
 									);
 
 									// Pintamos la tarjeta de este día.
+									const esDiaActual = esMismoDia(diaObj, new Date());
+
 									return (
-										<CardDiaSemanalPlanning
-											key={index}
-											index={index}
-											propuestasDelDia={propuestasDelDia}
-											diaObj={diaObj}
-											recetasRecuperadas={recetasRecuperadas}
-											cargarRecetasUsuario={cargarRecetasUsuario}
-											familiaSeleccionada={familiaSeleccionada}
-											onPropuestaCreada={refrescarPlanning}
-										/>
+										<Box ref={esDiaActual ? cardHoyRef : null}>
+											<CardDiaSemanalPlanning
+												key={index}
+												index={index}
+												propuestasDelDia={propuestasDelDia}
+												diaObj={diaObj}
+												recetasRecuperadas={recetasRecuperadas}
+												cargarRecetasUsuario={cargarRecetasUsuario}
+												familiaSeleccionada={familiaSeleccionada}
+												onPropuestaCreada={refrescarPlanning}
+												esAdminFamilia={esAdminFamilia}
+											/>
+										</Box>
 									);
 								})}
 							</Stack>

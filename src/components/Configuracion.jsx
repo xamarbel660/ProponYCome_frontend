@@ -1,3 +1,7 @@
+/**
+ * @fileoverview Dialogo de configuracion de usuario.
+ * Permite cambiar tema visual y cerrar sesion.
+ */
 import { Box, Button, Divider, IconButton, Typography } from '@mui/material';
 import Dialog from '@mui/material/Dialog';
 import DialogContent from '@mui/material/DialogContent';
@@ -6,6 +10,12 @@ import useAuthStore from '../store/authStore';
 import useThemeStore from '../store/useThemeStore';
 
 
+/**
+ * Dialogo de configuracion de preferencias y sesion.
+ *
+ * @param {{ open: boolean, onClose: () => void }} props - Estado y cierre del dialogo.
+ * @returns {JSX.Element}
+ */
 function Configuracion({ open, onClose }) {
     const logout = useAuthStore(state => state.logout); // Leemos el logout
     const user = useAuthStore(state => state.user); // Leemos el usuario

@@ -1,3 +1,6 @@
+/**
+ * @fileoverview Dialogo de detalle de receta con descripcion e ingredientes.
+ */
 import {
 	Box,
 	Chip,
@@ -12,11 +15,29 @@ import { ChefHat, Utensils, X } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import api from '../utils/api';
 
+/**
+ * Muestra una receta desde props o recuperandola por id en backend.
+ *
+ * @param {{
+ *  idReceta?: number|null,
+ *  open: boolean,
+ *  onClose: () => void,
+ *  recetaProp?: any,
+ *  ingredientesProp?: Array<any>|null
+ * }} props - Parametros de apertura y origen de datos.
+ * @returns {JSX.Element}
+ */
 function DialogoVerReceta({ idReceta, open, onClose, recetaProp = null, ingredientesProp = null }) {
 	const [receta, setReceta] = useState(null);
 	const [ingredientes, setIngredientes] = useState([]);
 	const [cargando, setCargando] = useState(false);
 
+	/**
+	 * Normaliza una lista heterogenea de ingredientes para pintarla en UI.
+	 *
+	 * @param {Array<any>} lista - Lista original de ingredientes.
+	 * @returns {Array<{ nombre_ingrediente: string, cantidad: number|null, unidad: string }>}
+	 */
 	const normalizarIngredientes = lista => {
 		if (!Array.isArray(lista)) return [];
 
@@ -102,7 +123,12 @@ function DialogoVerReceta({ idReceta, open, onClose, recetaProp = null, ingredie
 		fetchDetalles();
 	}, [open, idReceta, recetaProp, ingredientesProp]);
 
-	// Función auxiliar para obtener el color del chip de dificultad
+	/**
+	 * Devuelve el color semantico del chip segun dificultad.
+	 *
+	 * @param {string} dificultad - Nivel de dificultad de receta.
+	 * @returns {'success'|'warning'|'error'}
+	 */
 	const getColorDificultad = dificultad => {
 		if (dificultad === 'Fácil') return 'success';
 		if (dificultad === 'Media') return 'warning';
