@@ -102,7 +102,7 @@ function DialogoVerMiembros({ open, onClose, idFamilia }) {
 
     return (
         <>
-            <Dialog open={open} onClose={onClose} maxWidth="xs" fullWidth>
+            <Dialog open={open} onClose={onClose} maxWidth="xs" fullWidth sx={{ pt: 5, maxHeight: '91vh' }}>
                 {/* Titulo, subtitulo y boton de cerrar */}
                 <Box sx={{ pt: 2, textAlign: 'center', position: 'relative' }}>
                     <IconButton

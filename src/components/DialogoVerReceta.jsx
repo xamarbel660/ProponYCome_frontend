@@ -136,7 +136,7 @@ function DialogoVerReceta({ idReceta, open, onClose, recetaProp = null, ingredie
 	};
 
 	return (
-		<Dialog open={open} onClose={onClose} maxWidth="sm" fullWidth>
+		<Dialog open={open} onClose={onClose} maxWidth="xs" fullWidth sx={{ pt: 5, maxHeight: '91vh' }}>
 			{/* Botón de cerrar superior flotante */}
 			<IconButton
 				onClick={onClose}
