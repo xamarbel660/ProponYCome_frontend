@@ -207,13 +207,13 @@ function Familias() {
 
 	return (
 		<>
-			{/* 1. Un Box principal solo para dar margen a los lados (p: 2 equivale a 16px) */}
+			{/* Un Box principal solo para dar margen a los lados (p: 2 equivale a 16px) */}
 			{/* IMPORTANTE: Aquí NO ponemos anchos, ni altos, ni colores de fondo generales. */}
 			<Box sx={{ p: 2 }}>
-				{/* 2. Un Stack para apilar tus elementos verticalmente con una separación uniforme */}
+				{/* Un Stack para apilar tus elementos verticalmente con una separación uniforme */}
 				<Stack spacing={2}>
 					<Box>
-						{/* Titulo, subtitulo y boton de crear nueva receta*/}
+						{/* Titulo, subtitulo y boton de crear nueva familia y unirse a una nueva familia */}
 						<Stack sx={{ mb: 4 }}>
 							<Typography variant="h5" sx={{ fontWeight: 'bold' }}> Mis Familias</Typography>
 							<Typography variant="subtitle2" color="text.secondary">
