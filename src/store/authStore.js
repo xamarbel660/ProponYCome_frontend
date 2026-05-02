@@ -6,6 +6,7 @@
 
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
+import { isJwtExpired } from '../utils/jwt';
 
 /**
  * Hook de Zustand que proporciona acceso al estado de autenticación.
@@ -61,6 +62,27 @@ const useAuthStore = create(
 			 * 'name' define la clave bajo la cual se guardará el JSON en el localStorage.
 			 */
 			name: 'auth-storage',
+			onRehydrateStorage: () => (state, error) => {
+				if (error || !state) return;
+
+				const token = state.token;
+				// Si no hay token, forzamos estado consistente.
+				if (!token) {
+					state.logout();
+					return;
+				}
+
+				// Si el token ya está expirado, cerramos sesión.
+				if (isJwtExpired(token)) {
+					state.logout();
+					return;
+				}
+
+				// Si hay token válido, aseguramos isAuth=true.
+				if (!state.isAuth) {
+					state.login(token, state.user);
+				}
+			},
 		}
 	)
 );

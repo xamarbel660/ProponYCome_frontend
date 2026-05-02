@@ -2,11 +2,12 @@
  * @fileoverview Configuracion principal de la aplicacion:
  * rutas, guardias de acceso y proveedor de tema MUI.
  */
-import { createBrowserRouter, Navigate } from 'react-router';
-import { RouterProvider } from 'react-router/dom';
-import { useEffect } from 'react';
 import { Capacitor } from '@capacitor/core';
 import { SplashScreen } from '@capacitor/splash-screen';
+import { createTheme, CssBaseline, ThemeProvider } from '@mui/material';
+import { useEffect, useRef } from 'react';
+import { createBrowserRouter, Navigate } from 'react-router';
+import { RouterProvider } from 'react-router/dom';
 import AuthPage from './pages/AuthPage';
 import Compras from './pages/Compras';
 import ErrorPage from './pages/ErrorPage';
@@ -17,7 +18,7 @@ import Planning from './pages/Planning';
 import Recetas from './pages/Recetas';
 import useAuthStore from './store/authStore';
 import useThemeStore from './store/useThemeStore';
-import { createTheme, CssBaseline, ThemeProvider } from '@mui/material';
+import { getJwtExpMs, isJwtExpired } from './utils/jwt';
 
 /**
  * Protege rutas privadas: redirige a login si no hay sesion activa.
@@ -96,6 +97,10 @@ const router = createBrowserRouter([
  * @returns {JSX.Element} La aplicación completa envuelta en proveedores de contexto.
  */
 function App() {
+	const logout = useAuthStore((state) => state.logout);
+	const token = useAuthStore((state) => state.token);
+	const logoutTimerRef = useRef(null);
+
 	useEffect(() => {
 		if (!Capacitor.isNativePlatform()) return;
 
@@ -109,6 +114,39 @@ function App() {
 
 		void hideLaunchSplash();
 	}, []);
+
+	useEffect(() => {
+		// Si el token cambia, reprogramamos el cierre de sesión automático.
+		if (logoutTimerRef.current) {
+			clearTimeout(logoutTimerRef.current);
+			logoutTimerRef.current = null;
+		}
+
+		if (!token) return;
+		// Si no podemos leer el exp o ya expiró, cerramos sesión.
+		if (isJwtExpired(token)) {
+			logout();
+			return;
+		}
+
+		const expMs = getJwtExpMs(token);
+		if (!expMs) {
+			logout();
+			return;
+		}
+
+		const msHastaExpirar = expMs - Date.now();
+		logoutTimerRef.current = setTimeout(() => {
+			logout();
+		}, Math.max(0, msHastaExpirar));
+
+		return () => {
+			if (logoutTimerRef.current) {
+				clearTimeout(logoutTimerRef.current);
+				logoutTimerRef.current = null;
+			}
+		};
+	}, [token, logout]);
 
 	// Recuperamos el modo (dark / light) del store global de Zustand
 	// Esto permite persistencia del tema entre recargas

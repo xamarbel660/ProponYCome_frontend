@@ -56,6 +56,12 @@ api.interceptors.response.use(
 
     if (error.response) {
       // El servidor respondió con un código de estado fuera del rango 2xx
+      // Si el backend indica que el token es inválido/expiró, cerramos sesión.
+      if (error.response.status === 401 || error.response.status === 403) {
+        const { logout } = useAuthStore.getState();
+        logout();
+      }
+
       respuestaError.mensaje = error.response.data?.mensaje ||
         `Error: ${error.response.status} ${error.response.statusText}`;
 
