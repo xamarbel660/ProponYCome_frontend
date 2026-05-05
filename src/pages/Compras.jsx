@@ -302,16 +302,19 @@ function Compras() {
 												Cantidad de ingredientes: {ingredientesComprar.length}
 											</Typography>
 										</Box>
-										<IconButton sx={{ mt: 3, mr: 2 }} onClick={descargarPDF}>
+										<IconButton sx={{ mt: 3, mr: 2 }} onClick={descargarPDF} disabled={ingredientesComprar.length === 0}>
 											<FileDown color='black' />
 										</IconButton>
 									</Box>
 									<CardContent>
 										{ingredientesComprar.length === 0 ? (
-											<Typography variant="body1" color="text.secondary">
-												<ShoppingCart />
-												No hay comidas aprobadas para esta semana. Aprueba propuestas en el planificador semanal
-											</Typography>
+											<Box sx={{ display: 'block', alignContent: 'center', alignItems: 'center',justifyContent: 'center', textAlign: 'center', py:5, color:'text.secondary' }}>
+												<ShoppingCart size={90} />
+												<Typography variant="body1" color="text.secondary">
+													No hay comidas aprobadas para esta semana. Aprueba propuestas en el planificador semanal
+												</Typography>
+											</Box>
+
 										) : (
 											<>
 												{ingredientesComprar.map((item) => (

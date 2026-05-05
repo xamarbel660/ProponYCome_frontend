@@ -2,12 +2,11 @@
  * @fileoverview Configuracion principal de la aplicacion:
  * rutas, guardias de acceso y proveedor de tema MUI.
  */
-import { Capacitor } from '@capacitor/core';
-import { SplashScreen } from '@capacitor/splash-screen';
-import { createTheme, CssBaseline, ThemeProvider } from '@mui/material';
-import { useEffect, useRef } from 'react';
 import { createBrowserRouter, Navigate } from 'react-router';
 import { RouterProvider } from 'react-router/dom';
+import { useEffect, useRef } from 'react';
+import { Capacitor } from '@capacitor/core';
+import { SplashScreen } from '@capacitor/splash-screen';
 import AuthPage from './pages/AuthPage';
 import Compras from './pages/Compras';
 import ErrorPage from './pages/ErrorPage';
@@ -18,6 +17,7 @@ import Planning from './pages/Planning';
 import Recetas from './pages/Recetas';
 import useAuthStore from './store/authStore';
 import useThemeStore from './store/useThemeStore';
+import { createTheme, CssBaseline, ThemeProvider } from '@mui/material';
 import { getJwtExpMs, isJwtExpired } from './utils/jwt';
 
 /**
@@ -123,22 +123,39 @@ function App() {
 		}
 
 		if (!token) return;
-		// Si no podemos leer el exp o ya expiró, cerramos sesión.
+		// Si ya expiró, cerramos sesión.
 		if (isJwtExpired(token)) {
 			logout();
 			return;
 		}
 
 		const expMs = getJwtExpMs(token);
-		if (!expMs) {
-			logout();
-			return;
-		}
+		// Si no se puede determinar exp, no forzamos logout aquí.
+		// En ese caso, el backend (401/403) cortará la sesión si el token no vale.
+		if (!expMs) return;
 
-		const msHastaExpirar = expMs - Date.now();
-		logoutTimerRef.current = setTimeout(() => {
-			logout();
-		}, Math.max(0, msHastaExpirar));
+		// setTimeout usa internamente un int32 (máx ~24.8 días). Para expiraciones largas
+		// (p.ej. 180d) hay overflow y podría dispararse inmediato. Clampeamos y reintentamos.
+		const MAX_TIMEOUT_MS = 2147483647;
+		const programarLogout = () => {
+			const msHastaExpirar = expMs - Date.now();
+			if (msHastaExpirar <= 0) {
+				logout();
+				return;
+			}
+
+			const delay = Math.min(msHastaExpirar, MAX_TIMEOUT_MS);
+			logoutTimerRef.current = setTimeout(() => {
+				// Re-evaluamos y, si aún no expiró, reprogramamos.
+				if (isJwtExpired(token)) {
+					logout();
+					return;
+				}
+				programarLogout();
+			}, delay);
+		};
+
+		programarLogout();
 
 		return () => {
 			if (logoutTimerRef.current) {

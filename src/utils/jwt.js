@@ -38,8 +38,15 @@ export function decodeJwtPayload(token) {
  */
 export function getJwtExpMs(token) {
 	const payload = decodeJwtPayload(token);
-	const expSeconds = payload?.exp;
-	if (typeof expSeconds !== 'number' || !Number.isFinite(expSeconds)) return null;
+	const expSecondsRaw = payload?.exp;
+	const expSeconds =
+		typeof expSecondsRaw === 'number'
+			? expSecondsRaw
+			: typeof expSecondsRaw === 'string'
+				? Number(expSecondsRaw)
+				: NaN;
+
+	if (!Number.isFinite(expSeconds)) return null;
 	return expSeconds * 1000;
 }
 
