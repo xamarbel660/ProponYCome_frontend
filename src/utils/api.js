@@ -4,6 +4,7 @@
  */
 import axios from 'axios';
 import useAuthStore from '../store/authStore';
+import useNotificationStore from '../store/notificationStore';
 
 /**
  * URL base de backend inyectada por Vite.
@@ -47,6 +48,53 @@ api.interceptors.response.use(
     return response.data;
   },
   (error) => {
+    const notifyError = (mensaje) => {
+      // Permite desactivar la notificación global por request si hiciera falta.
+      if (error?.config?.silentNotification) return;
+
+      try {
+        useNotificationStore.getState().showNotification({
+          mensaje,
+          severidad: 'error',
+          duracionMs: 5000,
+        });
+      } catch {
+        // Evita romper la promesa si por alguna razón el store no está disponible.
+      }
+    };
+
+    const getMensajeUsuario = () => {
+      // Timeout (Axios)
+      if (error?.code === 'ECONNABORTED' || String(error?.message || '').toLowerCase().includes('timeout')) {
+        return 'La solicitud ha tardado demasiado. Inténtalo de nuevo.';
+      }
+
+      if (error?.response) {
+        const status = error.response.status;
+
+        if (status === 401 || status === 403) {
+          return 'Tu sesión ha caducado. Inicia sesión de nuevo.';
+        }
+        if (status === 404) {
+          return 'No se ha encontrado el recurso solicitado.';
+        }
+        if (status === 400) {
+          return 'No se pudo completar la solicitud. Revisa los datos e inténtalo de nuevo.';
+        }
+        if (status >= 500) {
+          return 'Ha ocurrido un error del servidor. Inténtalo más tarde.';
+        }
+
+        return 'Ha ocurrido un error. Inténtalo de nuevo.';
+      }
+
+      if (error?.request) {
+        return 'No se pudo conectar con el servidor. Revisa tu conexión.';
+      }
+
+      return 'Ha ocurrido un error. Inténtalo de nuevo.';
+    };
+
     // Manejo centralizado de errores
     let respuestaError = {
       ok: false,
@@ -81,6 +129,9 @@ api.interceptors.response.use(
       respuestaError.mensaje = error.message || 'Error al realizar la solicitud';
       console.error('Error en la solicitud:', error.message);
     }
+
+    // Notificación global (mensaje genérico para usuario)
+    notifyError(getMensajeUsuario());
 
     return Promise.reject(respuestaError);
   }

@@ -19,6 +19,7 @@ import useAuthStore from './store/authStore';
 import useThemeStore from './store/useThemeStore';
 import { createTheme, CssBaseline, ThemeProvider } from '@mui/material';
 import { getJwtExpMs, isJwtExpired } from './utils/jwt';
+import NotificationHost from './components/NotificationHost';
 
 /**
  * Protege rutas privadas: redirige a login si no hay sesion activa.
@@ -75,7 +76,7 @@ const router = createBrowserRouter([
 				<Home /> {/* Home.jsx tiene el <Outlet /> y el <Navbar /> */}
 			</RutaPrivada>
 		),
-		errorElement: <ErrorPage />,
+		// errorElement: <ErrorPage />,
 		children: [
 			{
 				index: true, // Esto es la ruta "/" exacta
@@ -302,6 +303,7 @@ function App() {
 				{/* CssBaseline aplica estilos base de MUI */}
 				<CssBaseline />
 				<RouterProvider router={router} />
+				<NotificationHost />
 			</ThemeProvider>
 		</>
 	);
