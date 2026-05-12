@@ -41,24 +41,6 @@ function DialogoConfirmacion({
 			</Box>
 			<DialogActions sx={{ px: 3, pb: 3, pt: 0 }}>
 				<Button
-					startIcon={<Trash2 />}
-					onClick={onConfirm}
-					fullWidth
-					variant="contained"
-					disabled={isProcessing}
-					sx={{
-						bgcolor: 'error.main',
-						color: 'error.contrastText',
-						py: 1.5,
-						borderRadius: '8px',
-						fontWeight: 'bold',
-						textTransform: 'none',
-						'&:hover': { bgcolor: 'error.dark' },
-					}}
-				>
-					{confirmText}
-				</Button>
-				<Button
 					startIcon={<X />}
 					onClick={onClose}
 					fullWidth
@@ -75,6 +57,24 @@ function DialogoConfirmacion({
 					}}
 				>
 					{cancelText}
+				</Button>
+				<Button
+					startIcon={<Trash2 />}
+					onClick={onConfirm}
+					fullWidth
+					variant="contained"
+					disabled={isProcessing}
+					sx={{
+						bgcolor: 'error.main',
+						color: 'error.contrastText',
+						py: 1.5,
+						borderRadius: '8px',
+						fontWeight: 'bold',
+						textTransform: 'none',
+						'&:hover': { bgcolor: 'error.dark' },
+					}}
+				>
+					{confirmText}
 				</Button>
 			</DialogActions>
 		</Dialog>

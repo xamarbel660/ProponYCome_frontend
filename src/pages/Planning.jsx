@@ -4,7 +4,6 @@
  */
 import {
 	Box,
-	Card,
 	FormControl,
 	IconButton,
 	InputLabel,
@@ -16,8 +15,9 @@ import {
 import { MoveLeft, MoveRight } from 'lucide-react';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import CardDiaSemanalPlanning from '../components/CardDiaSemanalPlanning';
+import useNotificationStore from '../store/notificationStore';
 import api from '../utils/api';
-import { formatearFechaAmigable, obtenerLimitesSemana, formatearFechaApi } from '../utils/formatosFechas';
+import { formatearFechaAmigable, formatearFechaApi, obtenerLimitesSemana } from '../utils/formatosFechas';
 const LIMITE_SEMANAS = 5;
 
 const esMismoDia = (fechaA, fechaB) => (
@@ -57,6 +57,7 @@ function Planning() {
 
 	// Guardamos si el usuario es administrador de la familia para mostrarle o no ciertas opciones en el planning
 	const [esAdminFamilia, setEsAdminFamilia] = useState(false);
+	const showNotification = useNotificationStore(state => state.showNotification);
 
 	// Texto para el título de la semana y control de habilitación de botones de navegación
 	const textoLunes = formatearFechaAmigable(lunes);
@@ -114,6 +115,11 @@ function Planning() {
 			} catch (error) {
 				console.log(error);
 				setFamiliasRecuperadas([]);
+				showNotification({
+					mensaje: error?.mensaje || 'No se pudieron cargar las familias.',
+					severidad: 'error',
+					duracionMs: 6000,
+				});
 			}
 		}
 
@@ -139,12 +145,18 @@ function Planning() {
 			} catch (error) {
 				console.log(error);
 				setPlanningFamilia([]);
+				showNotification({
+					mensaje: error?.mensaje || 'No se pudo cargar el planning de la familia.',
+					severidad: 'error',
+					duracionMs: 6000,
+				});
 			}
 		}
 
 		planningDeLaFamilia();
 	}, [familiaSeleccionada, inicioStr, finStr, refreshPlanningKey]);
 
+	// Hacemos scroll automático al día actual si la semana mostrada incluye el día de hoy
 	useEffect(() => {
 		if (!familiaSeleccionada || !debeScrollAHoy) {
 			return;
@@ -188,6 +200,11 @@ function Planning() {
 			.catch((error) => {
 				console.log(error);
 				setRecetasRecuperadas([]);
+				showNotification({
+					mensaje: error?.mensaje || 'No se pudieron cargar las recetas.',
+					severidad: 'error',
+					duracionMs: 6000,
+				});
 			})
 			.finally(() => {
 				recetasRequestRef.current = null;

@@ -3,7 +3,6 @@
  * Incluye listado paginado, creacion, edicion, borrado y vista de detalle.
  */
 import {
-	Alert,
 	Box,
 	Button,
 	Card,
@@ -11,17 +10,17 @@ import {
 	Chip,
 	Grid,
 	IconButton,
+	Pagination,
 	Stack,
 	Typography,
-	Zoom,
-	Pagination,
 } from '@mui/material';
-import { ChartNoAxesColumnIncreasing, Plus, SquarePen, Trash2, Eye } from 'lucide-react';
+import { ChartNoAxesColumnIncreasing, Eye, Plus, SquarePen, Trash2 } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import DialogoConfirmacion from '../components/DialogoConfirmacion';
 import DialogoReceta from '../components/DialogoCrearReceta';
-import api from '../utils/api';
 import DialogoVerReceta from '../components/DialogoVerReceta';
+import useNotificationStore from '../store/notificationStore';
+import api from '../utils/api';
 
 /**
  * Pagina principal de recetas del usuario.
@@ -44,12 +43,7 @@ function Recetas() {
 	const [openDialogVerReceta, setOpenDialogVerReceta] = useState(false);
 	// Indica si se está procesando el envío
 	const [isUpdating, setIsUpdating] = useState(false);
-	// Estado para mostrar alertas
-	const [alerta, setAlerta] = useState({
-		mostrar: false,
-		mensaje: '',
-		severidad: 'success',
-	});
+	const showNotification = useNotificationStore(state => state.showNotification);
 	// Indica si es necesario actualizar los datos o no
 	const [recargarDatos, setRecargarDatos] = useState(false);
 	// Estado dinámico para el modo del diálogo
@@ -67,11 +61,11 @@ function Recetas() {
 		setRecargarDatos(prev => !prev);
 		setOpenDialogReceta(false);
 		setIsUpdating(false);
-		setAlerta({
-			mostrar: true,
+		showNotification({
 			mensaje:
 				tipo === 'Nueva' ? 'Receta creada correctamente' : 'Receta actualizada correctamente',
 			severidad: 'success',
+			duracionMs: 5000,
 		});
 	};
 
@@ -148,29 +142,24 @@ function Recetas() {
 			setRecargarDatos(prev => !prev);
 			// Cerramos el diálogo
 			setOpenDialogConfirmarEliminarReceta(false);
-			setAlerta({
-				mostrar: true,
+			showNotification({
 				mensaje: 'Receta borrada correctamente',
 				severidad: 'success',
+				duracionMs: 5000,
 			});
 			setIdRecetaActiva(null);
 		} catch (error) {
 			console.log(error);
+			showNotification({
+				mensaje: 'No se pudo borrar la receta. Inténtalo de nuevo.',
+				severidad: 'error',
+				duracionMs: 5000,
+			});
 			setRecetasRecuperadas([]);
 		} finally {
 			setIsUpdating(false); // Desbloqueamos los botones, independientemente de si hubo éxito o error
 		}
 	}
-
-	// useEffect para que el Alert desaparezca
-	useEffect(() => {
-		if (alerta.mostrar) {
-			const timer = setTimeout(() => {
-				setAlerta(prev => ({ ...prev, mostrar: false }));
-			}, 5000);
-			return () => clearTimeout(timer);
-		}
-	}, [alerta.mostrar]);
 
 	return (
 		<>
@@ -374,34 +363,6 @@ function Recetas() {
 					</Box>
 				</Stack>
 			</Box>
-			{/* Renderizado del mensaje de alerta unificado */}
-			{alerta.mostrar && (
-				<Box
-					sx={{
-						position: 'fixed',
-						top: '85%',
-						left: '50%',
-						transform: 'translate(-50%, -50%)',
-						zIndex: 2000,
-						width: { xs: '90%', sm: 'auto' },
-						minWidth: { sm: 300 },
-					}}
-				>
-					<Zoom in={alerta.mostrar}>
-						<Alert
-							severity={alerta.severidad}
-							variant="filled"
-							sx={{
-								borderRadius: 2,
-								boxShadow: '0px 4px 12px rgba(0,0,0,0.15)',
-								width: '100%',
-							}}
-						>
-							{alerta.mensaje}
-						</Alert>
-					</Zoom>
-				</Box>
-			)}
 		</>
 	);
 }

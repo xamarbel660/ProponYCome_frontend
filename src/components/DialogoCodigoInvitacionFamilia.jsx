@@ -1,7 +1,7 @@
 /**
  * @fileoverview Dialogo para visualizar, copiar y regenerar codigo de invitacion familiar.
  */
-import { Box, Button, IconButton, Typography, Alert } from '@mui/material';
+import { Box, Button, IconButton, Typography } from '@mui/material';
 import Dialog from '@mui/material/Dialog';
 import DialogContent from '@mui/material/DialogContent';
 import TextField from '@mui/material/TextField';
@@ -9,6 +9,7 @@ import { Clipboard, X, Check, Sparkle } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import api from '../utils/api';
 import { Clipboard as ClipboardAPI } from '@capacitor/clipboard';
+import useNotificationStore from '../store/notificationStore';
 
 /**
  * Dialogo de gestion de codigo de invitacion de una familia.
@@ -33,6 +34,7 @@ function DialogoCodigoInvitacion({ open, onClose, esAdmin, nombreFamilia, codigo
     const [generado, setGenerado] = useState(false);
     // Estado local del código de invitación
     const [codigoLocal, setCodigoLocal] = useState(codigoInvitacion);
+    const showNotification = useNotificationStore(state => state.showNotification);
 
     // Sincronizar el código local con la prop cuando se abre el diálogo
     useEffect(() => {
@@ -59,6 +61,11 @@ function DialogoCodigoInvitacion({ open, onClose, esAdmin, nombreFamilia, codigo
             const codigoActualizado = response.datos;
             setCodigoLocal(codigoActualizado);
             setGenerado(true);
+            showNotification({
+                mensaje: 'Código de invitación actualizado correctamente.',
+                severidad: 'success',
+                duracionMs: 4000,
+            });
 
             // Notificamos al padre que se actualizó el código
             if (onCodigoActualizado) {
@@ -69,7 +76,11 @@ function DialogoCodigoInvitacion({ open, onClose, esAdmin, nombreFamilia, codigo
             setTimeout(() => setGenerado(false), 3000);
         } catch (error) {
             console.log('Error guardando:', error);
-            // Podrías poner aquí un setErrores({ global: "Error en el servidor" }) si quisieras
+            showNotification({
+                mensaje: error?.mensaje || 'No se pudo actualizar el código de invitación.',
+                severidad: 'error',
+                duracionMs: 6000,
+            });
         } finally {
             setIsUpdating(false);
         }
@@ -95,6 +106,11 @@ function DialogoCodigoInvitacion({ open, onClose, esAdmin, nombreFamilia, codigo
                 string: codigoLocal
             });
             setCopiado(true);
+            showNotification({
+                mensaje: 'Código copiado al portapapeles.',
+                severidad: 'success',
+                duracionMs: 3000,
+            });
             // Después de 3 segundos, ocultamos el mensaje
             setTimeout(() => setCopiado(false), 3000);
         } catch (error) {
@@ -103,9 +119,19 @@ function DialogoCodigoInvitacion({ open, onClose, esAdmin, nombreFamilia, codigo
             try {
                 await navigator.clipboard.writeText(codigoLocal);
                 setCopiado(true);
+                showNotification({
+                    mensaje: 'Código copiado al portapapeles.',
+                    severidad: 'success',
+                    duracionMs: 3000,
+                });
                 setTimeout(() => setCopiado(false), 3000);
             } catch (err) {
                 console.error('Error con ambos métodos:', err);
+                showNotification({
+                    mensaje: 'No se pudo copiar el código. Inténtalo de nuevo.',
+                    severidad: 'error',
+                    duracionMs: 6000,
+                });
             }
         }
     };
@@ -132,11 +158,6 @@ function DialogoCodigoInvitacion({ open, onClose, esAdmin, nombreFamilia, codigo
                 </Box>
                 {/* Formulario para crear/unirme a una nueva familia */}
                 <DialogContent>
-                    {copiado && (
-                        <Alert severity="success" sx={{ mb: 2 }}>
-                            ¡Código copiado al portapapeles!
-                        </Alert>
-                    )}
                     <TextField
                         label="Codigo de invitación"
                         id="codigo_invitacion"

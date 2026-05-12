@@ -8,6 +8,7 @@ import DialogContent from '@mui/material/DialogContent';
 import TextField from '@mui/material/TextField';
 import { Check, X } from 'lucide-react';
 import { useState } from 'react';
+import useNotificationStore from '../store/notificationStore';
 import api from '../utils/api';
 
 /**
@@ -34,6 +35,7 @@ function DialogoFamilia({ modo, open, onClose, onSuccess }) {
 
     // Indica si hay errores en el formulario
     const [errores, setErrores] = useState({});
+    const showNotification = useNotificationStore(state => state.showNotification);
 
     /**
      * Actualiza el estado del formulario para crear familia.
@@ -73,7 +75,11 @@ function DialogoFamilia({ modo, open, onClose, onSuccess }) {
             onSuccess(modo);
         } catch (error) {
             console.log('Error guardando:', error);
-            // Podrías poner aquí un setErrores({ global: "Error en el servidor" }) si quisieras
+            showNotification({
+                mensaje: error?.mensaje || 'No se pudo completar la operación.',
+                severidad: 'error',
+                duracionMs: 6000,
+            });
         } finally {
             setIsUpdating(false);
         }

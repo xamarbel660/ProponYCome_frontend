@@ -7,8 +7,9 @@ import DialogActions from '@mui/material/DialogActions';
 import DialogContent from '@mui/material/DialogContent';
 import TextField from '@mui/material/TextField';
 import { Check, Plus, Trash2, X } from 'lucide-react';
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import api from '../utils/api';
+import useNotificationStore from '../store/notificationStore';
 
 /**
  * Formulario modal de receta en modo creacion o edicion.
@@ -24,6 +25,11 @@ import api from '../utils/api';
  * @returns {JSX.Element}
  */
 function DialogoReceta({ modo, idReceta, open, onClose, onSuccess, ingredientesRecuperados }) {
+	const onCloseRef = useRef(onClose);
+	useEffect(() => {
+		onCloseRef.current = onClose;
+	}, [onClose]);
+
 	// Hay dos modos, "Nueva" y "Editar"
 	// Receta que se está editando o creando
 	const [recetaActual, setRecetaActual] = useState({
@@ -73,6 +79,12 @@ function DialogoReceta({ modo, idReceta, open, onClose, onSuccess, ingredientesR
 					setIngredientes(ingredientesMapeados);
 				} catch (error) {
 					console.error('Error cargando receta', error);
+					useNotificationStore.getState().showNotification({
+						mensaje: 'No se pudo cargar la receta para editar.',
+						severidad: 'error',
+						duracionMs: 5000,
+					});
+					onCloseRef.current?.();
 				} finally {
 					setIsUpdating(false);
 				}
@@ -80,6 +92,7 @@ function DialogoReceta({ modo, idReceta, open, onClose, onSuccess, ingredientesR
 				// Vaciamos si es nueva
 				setRecetaActual({ titulo: '', descripcion: '', dificultad: '' });
 				setIngredientes([{ nombre_ingrediente: '', cantidad: '', unidad: '' }]);
+				setErrores({});
 			}
 		}
 		fetchDetalles();
@@ -161,7 +174,11 @@ function DialogoReceta({ modo, idReceta, open, onClose, onSuccess, ingredientesR
 			onSuccess(modo);
 		} catch (error) {
 			console.log('Error guardando:', error);
-			// Podrías poner aquí un setErrores({ global: "Error en el servidor" }) si quisieras
+			useNotificationStore.getState().showNotification({
+				mensaje: 'No se pudo guardar la receta. Inténtalo de nuevo.',
+				severidad: 'error',
+				duracionMs: 5000,
+			});
 		} finally {
 			setIsUpdating(false);
 		}

@@ -14,6 +14,7 @@ import {
 import { ChefHat, Utensils, X } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import api from '../utils/api';
+import useNotificationStore from '../store/notificationStore';
 
 /**
  * Muestra una receta desde props o recuperandola por id en backend.
@@ -31,6 +32,7 @@ function DialogoVerReceta({ idReceta, open, onClose, recetaProp = null, ingredie
 	const [receta, setReceta] = useState(null);
 	const [ingredientes, setIngredientes] = useState([]);
 	const [cargando, setCargando] = useState(false);
+	const [errorCarga, setErrorCarga] = useState(false);
 
 	/**
 	 * Normaliza una lista heterogenea de ingredientes para pintarla en UI.
@@ -79,8 +81,11 @@ function DialogoVerReceta({ idReceta, open, onClose, recetaProp = null, ingredie
 				// Limpiamos los datos cuando se cierra para que no parpadee la receta anterior al abrir otra
 				setReceta(null);
 				setIngredientes([]);
+				setCargando(false);
+				setErrorCarga(false);
 				return;
 			}
+			setErrorCarga(false);
 
 			if (recetaProp) {
 				const ingredientesDesdeProps = Array.isArray(ingredientesProp)
@@ -110,6 +115,14 @@ function DialogoVerReceta({ idReceta, open, onClose, recetaProp = null, ingredie
 					setIngredientes(respuesta.datos.ingredientes || []);
 				} catch (error) {
 					console.error('Error cargando la receta', error);
+					setReceta(null);
+					setIngredientes([]);
+					setErrorCarga(true);
+					useNotificationStore.getState().showNotification({
+						mensaje: 'No se pudo cargar la receta.',
+						severidad: 'error',
+						duracionMs: 5000,
+					});
 				} finally {
 					setCargando(false);
 				}
@@ -117,6 +130,7 @@ function DialogoVerReceta({ idReceta, open, onClose, recetaProp = null, ingredie
 				setReceta(null);
 				setIngredientes([]);
 				setCargando(false);
+				setErrorCarga(false);
 			}
 		}
 
@@ -145,9 +159,21 @@ function DialogoVerReceta({ idReceta, open, onClose, recetaProp = null, ingredie
 				<X size={25} />
 			</IconButton>
 
-			{cargando || !receta ? (
+			{cargando ? (
 				<Box sx={{ display: 'flex', justifyContent: 'center', p: 5 }}>
 					<CircularProgress sx={{ color: 'primary.main' }} />
+				</Box>
+			) : errorCarga ? (
+				<Box sx={{ display: 'flex', justifyContent: 'center', p: 5 }}>
+					<Typography variant="body2" sx={{ color: 'text.secondary' }}>
+						No se pudo cargar la receta.
+					</Typography>
+				</Box>
+			) : !receta ? (
+				<Box sx={{ display: 'flex', justifyContent: 'center', p: 5 }}>
+					<Typography variant="body2" sx={{ color: 'text.secondary' }}>
+						No hay datos de receta.
+					</Typography>
 				</Box>
 			) : (
 				<>

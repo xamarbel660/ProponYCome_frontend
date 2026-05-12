@@ -2,7 +2,7 @@
  * @fileoverview Gestion de familias del usuario:
  * creacion, union, consulta de miembros, invitaciones y salida/eliminacion.
  */
-import { Alert, Box, Button, Card, CardContent, Chip, Grid, Pagination, Stack, Typography, Zoom } from '@mui/material';
+import { Box, Button, Card, CardContent, Chip, Grid, Pagination, Stack, Typography } from '@mui/material';
 import { grey } from '@mui/material/colors';
 import { Crown, Eye, LogOut, Plus, QrCode, Trash2, UserPlus, Users } from 'lucide-react';
 import { useEffect, useState } from 'react';
@@ -10,9 +10,10 @@ import DialogoCodigoInvitacion from '../components/DialogoCodigoInvitacionFamili
 import DialogoConfirmacion from '../components/DialogoConfirmacion';
 import DialogoFamilia from '../components/DialogoFamilia';
 import DialogoVerMiembros from '../components/DialogoVerMiembros';
+import useNotificationStore from '../store/notificationStore';
 import api from '../utils/api';
 
-/**
+/** 
  * Pagina principal de familias del usuario autenticado.
  *
  * @returns {JSX.Element}
@@ -33,12 +34,7 @@ function Familias() {
 	const [openDialogCodigoInvitacion, setOpenDialogCodigoInvitacion] = useState(false);
 	// Indica si se está procesando el envío
 	const [isUpdating, setIsUpdating] = useState(false);
-	// Estado para mostrar alertas
-	const [alerta, setAlerta] = useState({
-		mostrar: false,
-		mensaje: '',
-		severidad: 'success',
-	});
+	const showNotification = useNotificationStore(state => state.showNotification);
 	// Indica si es necesario actualizar los datos o no
 	const [recargarDatos, setRecargarDatos] = useState(false);
 	// Estado dinámico para el modo del diálogo
@@ -62,11 +58,10 @@ function Familias() {
 		setRecargarDatos(prev => !prev);
 		setOpenDialogFamilia(false);
 		setIsUpdating(false);
-		setAlerta({
-			mostrar: true,
-			mensaje:
-				tipo === 'Nueva' ? 'Familia creada correctamente' : 'Unido a la familia correctamente',
+		showNotification({
+			mensaje: tipo === 'Nueva' ? 'Familia creada correctamente' : 'Unido a la familia correctamente',
 			severidad: 'success',
+			duracionMs: 5000,
 		});
 	};
 
@@ -143,6 +138,11 @@ function Familias() {
 			} catch (error) {
 				console.log(error);
 				setFamiliasRecuperadas([]);
+				showNotification({
+					mensaje: error?.mensaje || 'No se pudieron cargar las familias.',
+					severidad: 'error',
+					duracionMs: 6000,
+				});
 			}
 		}
 
@@ -171,12 +171,12 @@ function Familias() {
 			setRecargarDatos(prev => !prev);
 			// Cerramos el diálogo
 			setOpenDialogConfirmarEliminarFamilia(false);
-			setAlerta({
-				mostrar: true,
+			showNotification({
 				mensaje: familiaActiva.es_admin
 					? 'Familia borrada correctamente'
 					: 'Has salido de la familia correctamente',
 				severidad: 'success',
+				duracionMs: 5000,
 			});
 			// Limpiamos la familia activa
 			setFamiliaActiva({
@@ -190,20 +190,15 @@ function Familias() {
 		} catch (error) {
 			console.log(error);
 			setFamiliasRecuperadas([]);
+			showNotification({
+				mensaje: error?.mensaje || 'No se pudo completar la operación.',
+				severidad: 'error',
+				duracionMs: 6000,
+			});
 		} finally {
 			setIsUpdating(false); // Desbloqueamos los botones, independientemente de si hubo éxito o error
 		}
 	}
-
-	// useEffect para que el Alert desaparezca
-	useEffect(() => {
-		if (alerta.mostrar) {
-			const timer = setTimeout(() => {
-				setAlerta(prev => ({ ...prev, mostrar: false }));
-			}, 5000);
-			return () => clearTimeout(timer);
-		}
-	}, [alerta.mostrar]);
 
 	return (
 		<>
@@ -424,34 +419,6 @@ function Familias() {
 					</Box>
 				</Stack>
 			</Box>
-			{/* Renderizado del mensaje de alerta unificado */}
-			{alerta.mostrar && (
-				<Box
-					sx={{
-						position: 'fixed',
-						top: '85%',
-						left: '50%',
-						transform: 'translate(-50%, -50%)',
-						zIndex: 2000,
-						width: { xs: '90%', sm: 'auto' },
-						minWidth: { sm: 300 },
-					}}
-				>
-					<Zoom in={alerta.mostrar}>
-						<Alert
-							severity={alerta.severidad}
-							variant="filled"
-							sx={{
-								borderRadius: 2,
-								boxShadow: '0px 4px 12px rgba(0,0,0,0.15)',
-								width: '100%',
-							}}
-						>
-							{alerta.mensaje}
-						</Alert>
-					</Zoom>
-				</Box>
-			)}
 		</>
 	);
 }

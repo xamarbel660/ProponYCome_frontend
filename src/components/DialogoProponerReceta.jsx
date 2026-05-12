@@ -5,7 +5,7 @@ import { Autocomplete, Button, Card, Dialog, DialogContent, DialogTitle, TextFie
 import { useEffect, useState } from "react";
 import api from "../utils/api";
 import { formatearFechaAmigable } from "../utils/formatosFechas";
-
+import useNotificationStore from '../store/notificationStore';
 
 /**
  * Dialogo de seleccion y envio de propuesta de receta al planning familiar.
@@ -25,6 +25,7 @@ import { formatearFechaAmigable } from "../utils/formatosFechas";
 function DialogoProponerReceta({ open, onClose, dia, turno, recetasRecuperadas, cargarRecetasUsuario, familiaSeleccionada, onPropuestaCreada }) {
     const [isUpdating, setIsUpdating] = useState(false);
     const [errorFormulario, setErrorFormulario] = useState('');
+    const showNotification = useNotificationStore(state => state.showNotification);
 
     // Receta seleccionada para proponer
     const [recetaSeleccionada, setRecetaSeleccionada] = useState(null);
@@ -89,10 +90,20 @@ function DialogoProponerReceta({ open, onClose, dia, turno, recetasRecuperadas, 
             if (onPropuestaCreada) {
                 await onPropuestaCreada();
             }
+            showNotification({
+                mensaje: 'Propuesta enviada correctamente.',
+                severidad: 'success',
+                duracionMs: 5000,
+            });
 
         } catch (error) {
             console.log('Error guardando:', error);
             setErrorFormulario(error?.mensaje || 'No se pudo guardar la propuesta');
+            showNotification({
+                mensaje: error?.mensaje || 'No se pudo guardar la propuesta.',
+                severidad: 'error',
+                duracionMs: 6000,
+            });
         } finally {
             setIsUpdating(false);
         }

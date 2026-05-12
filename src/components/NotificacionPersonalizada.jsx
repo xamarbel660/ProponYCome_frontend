@@ -23,7 +23,7 @@ function NotificacionPersonalizada({
         <Box
             sx={{
                 position: 'fixed',
-                top: '85%',
+                top: '82%',
                 left: '50%',
                 transform: 'translate(-50%, -50%)',
                 zIndex: 2000,

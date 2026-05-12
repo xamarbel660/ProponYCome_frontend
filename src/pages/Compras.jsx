@@ -1,3 +1,7 @@
+import { Capacitor } from "@capacitor/core";
+import { Directory, Filesystem } from "@capacitor/filesystem";
+import { Share } from "@capacitor/share";
+import { Toast } from "@capacitor/toast";
 import {
 	Box,
 	Card,
@@ -11,17 +15,13 @@ import {
 	Stack,
 	Typography
 } from '@mui/material';
-import { MoveLeft, MoveRight } from 'lucide-react';
-import { useEffect, useState } from 'react';
-import api from '../utils/api';
-import { ShoppingCart, FileDown } from 'lucide-react';
-import { formatearFechaAmigable, formatearFechaApi, obtenerLimitesSemana } from '../utils/formatosFechas';
-import { Capacitor } from "@capacitor/core";
-import { Filesystem, Directory } from "@capacitor/filesystem";
-import { Share } from "@capacitor/share";
-import { Toast } from "@capacitor/toast";
 import { pdf } from "@react-pdf/renderer";
+import { FileDown, MoveLeft, MoveRight, ShoppingCart } from 'lucide-react';
+import { useEffect, useState } from 'react';
 import ArchivoPdfIngredientes from '../components/ArchivoPdfIngredientes';
+import useNotificationStore from '../store/notificationStore';
+import api from '../utils/api';
+import { formatearFechaAmigable, formatearFechaApi, obtenerLimitesSemana } from '../utils/formatosFechas';
 const LIMITE_SEMANAS = 5;
 
 function Compras() {
@@ -44,6 +44,7 @@ function Compras() {
 	// Texto para el título de la semana y control de habilitación de botones de navegación
 	const textoLunes = formatearFechaAmigable(lunes);
 	const textoDomingo = formatearFechaAmigable(domingo);
+	const showNotification = useNotificationStore(state => state.showNotification);
 	// Control para no permitir navegar más de 5 semanas hacia adelante o hacia atrás
 	const puedeIrSemanaAnterior = desplazamientoSemana > -LIMITE_SEMANAS;
 	const puedeIrSemanaSiguiente = desplazamientoSemana < LIMITE_SEMANAS;
@@ -97,6 +98,11 @@ function Compras() {
 			} catch (error) {
 				console.log(error);
 				setFamiliasRecuperadas([]);
+				showNotification({
+					mensaje: error?.mensaje || 'No se pudieron cargar las familias.',
+					severidad: 'error',
+					duracionMs: 6000,
+				});
 			}
 		}
 
@@ -117,6 +123,11 @@ function Compras() {
 			} catch (error) {
 				console.log(error);
 				setIngredientesComprar([]);
+				showNotification({
+					mensaje: error?.mensaje || 'No se pudo cargar la lista de compra.',
+					severidad: 'error',
+					duracionMs: 6000,
+				});
 			}
 		}
 
@@ -135,6 +146,7 @@ function Compras() {
 		setFamiliaSeleccionada(event.target.value);
 	};
 
+	// Función para marcar un ingrediente como comprado o no comprado, actualizando el estado local y la base de datos
 	const handleToggleComprado = async (itemId, nuevoEstado) => {
 		setIngredientesComprar((prev) =>
 			prev.map((item) =>
@@ -151,9 +163,15 @@ function Compras() {
 					item.id_item === itemId ? { ...item, comprado: !nuevoEstado } : item
 				)
 			);
+			showNotification({
+				mensaje: error?.mensaje || 'No se pudo actualizar el ingrediente.',
+				severidad: 'error',
+				duracionMs: 6000,
+			});
 		}
 	};
 
+	// Función para descargar o compartir la lista de compra en PDF, adaptándose a las capacidades del dispositivo (navegador web vs móvil con Capacitor)
 	const descargarPDF = async () => {
 		try {
 			if (!ingredientesComprar || ingredientesComprar.length === 0) {

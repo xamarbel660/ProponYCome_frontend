@@ -5,7 +5,6 @@
 import Visibility from '@mui/icons-material/Visibility';
 import VisibilityOff from '@mui/icons-material/VisibilityOff';
 import {
-	Alert,
 	Avatar,
 	Box,
 	Button,
@@ -20,12 +19,12 @@ import {
 	Stack,
 	TextField,
 	Typography,
-	Zoom,
 } from '@mui/material';
 import { UtensilsCrossed } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import useAuthStore from '../store/authStore';
+import useNotificationStore from '../store/notificationStore';
 import api from '../utils/api';
 import { validarDatosLogin, validarDatosRegister } from '../utils/validadorDatos';
 
@@ -44,13 +43,13 @@ function AuthPage() {
 
 	// Tus estados lógicos (los mantengo)
 	const [isUpdating, setIsUpdating] = useState(false);
-	const [error, setError] = useState('');
 	const [usuarioLogin, setUsuarioLogin] = useState({ email: '', password_hash: '' });
 	const [usuarioRegister, setUsuarioRegister] = useState({
 		nombre: '',
 		email: '',
 		password_hash: '',
 	});
+	const showNotification = useNotificationStore(state => state.showNotification);
 
 	const [isCamposValidosLogin, setIsCamposValidosLogin] = useState({
 		email: true,
@@ -80,13 +79,15 @@ function AuthPage() {
 				// Guardamos los datos del usuario y el token en local storage (Zustand).
 				login(token, datos);
 
-				setError('');
-
 				// Mandamos al usuario a la pantalla principal (Zona Privada).
 				navigate('/');
 			} catch (error) {
 				console.log(error);
-				setError(error.mensaje || 'Error al iniciar sesión');
+				showNotification({
+					mensaje: error?.mensaje || 'Error al iniciar sesión',
+					severidad: 'error',
+					duracionMs: 6000,
+				});
 			}
 			// Pase lo que pase hemos terminado el proceso de actualización
 			setIsUpdating(false);
@@ -95,14 +96,6 @@ function AuthPage() {
 		if (isUpdating) fetchLogin();
 	}, [isUpdating]);
 
-	// useEffect para que el Alert desaparezca
-	useEffect(() => {
-		// 5s para que el Alert desaparezca
-		const timer = setTimeout(() => {
-			setError('');
-		}, 5000);
-		return () => clearTimeout(timer);
-	}, [error]);
 
 	/**
 	 * Actualiza los campos del formulario de login.
@@ -456,12 +449,6 @@ function AuthPage() {
 					)}
 				</Paper>
 
-				{/* Mensaje de Error */}
-				<Box sx={{ mt: 2, width: '100%' }}>
-					<Zoom in={error}>
-						<Alert severity="error">{error}</Alert>
-					</Zoom>
-				</Box>
 			</Stack>
 		</Box>
 	);

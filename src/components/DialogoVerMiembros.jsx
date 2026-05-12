@@ -1,11 +1,12 @@
 /**
  * @fileoverview Dialogo para visualizar miembros de familia y gestionar permisos.
  */
-import { Alert, Box, Button, Chip, IconButton, Typography } from '@mui/material';
+import { Box, Button, Chip, IconButton, Typography } from '@mui/material';
 import Dialog from '@mui/material/Dialog';
 import DialogContent from '@mui/material/DialogContent';
 import { Crown, LogOut, Shield, ShieldOff, X } from 'lucide-react';
 import { useCallback, useEffect, useState } from 'react';
+import useNotificationStore from '../store/notificationStore';
 import api from '../utils/api';
 import DialogoConfirmacion from './DialogoConfirmacion';
 
@@ -19,7 +20,7 @@ function DialogoVerMiembros({ open, onClose, idFamilia }) {
     const [familia, setFamilia] = useState(null);
     const [accionEnCurso, setAccionEnCurso] = useState(null);
     const [miembroAExpulsar, setMiembroAExpulsar] = useState(null);
-    const [feedback, setFeedback] = useState({ tipo: '', mensaje: '' });
+    const showNotification = useNotificationStore(state => state.showNotification);
 
     /**
      * Recupera informacion de la familia y listado actualizado de miembros.
@@ -32,7 +33,11 @@ function DialogoVerMiembros({ open, onClose, idFamilia }) {
             const familia = response.datos;
             setFamilia(familia);
         } catch (error) {
-            setFeedback({ tipo: 'error', mensaje: error.mensaje || 'No se pudo cargar la familia.' });
+            showNotification({
+                mensaje: error?.mensaje || 'No se pudo cargar la familia.',
+                severidad: 'error',
+                duracionMs: 6000,
+            });
         }
     }, [idFamilia]);
 
@@ -46,7 +51,6 @@ function DialogoVerMiembros({ open, onClose, idFamilia }) {
     useEffect(() => {
         if (!open) {
             setMiembroAExpulsar(null);
-            setFeedback({ tipo: '', mensaje: '' });
         }
     }, [open]);
 
@@ -65,13 +69,18 @@ function DialogoVerMiembros({ open, onClose, idFamilia }) {
             await api.post(`/familias/rol-admin/${idFamilia}/${idUsuarioObjetivo}`, {
                 es_administrador: esAdministrador,
             });
-            setFeedback({
-                tipo: 'success',
+            showNotification({
                 mensaje: esAdministrador ? 'Rol actualizado: ahora es administrador.' : 'Rol actualizado: ya no es administrador.',
+                severidad: 'success',
+                duracionMs: 5000,
             });
             await fetchFamilia();
         } catch (error) {
-            setFeedback({ tipo: 'error', mensaje: error.mensaje || 'No se pudo actualizar el rol.' });
+            showNotification({
+                mensaje: error?.mensaje || 'No se pudo actualizar el rol.',
+                severidad: 'error',
+                duracionMs: 6000,
+            });
         } finally {
             setAccionEnCurso(null);
         }
@@ -89,11 +98,19 @@ function DialogoVerMiembros({ open, onClose, idFamilia }) {
         setAccionEnCurso(`expulsar-${miembroAExpulsar.id_usuario}`);
         try {
             await api.delete(`/familias/miembro/${idFamilia}/${miembroAExpulsar.id_usuario}`);
-            setFeedback({ tipo: 'success', mensaje: `Se expulsó a ${miembroAExpulsar.nombre_usuario}.` });
+            showNotification({
+                mensaje: `Se expulsó a ${miembroAExpulsar.nombre_usuario}.`,
+                severidad: 'success',
+                duracionMs: 5000,
+            });
             setMiembroAExpulsar(null);
             await fetchFamilia();
         } catch (error) {
-            setFeedback({ tipo: 'error', mensaje: error.mensaje || 'No se pudo expulsar al miembro.' });
+            showNotification({
+                mensaje: error?.mensaje || 'No se pudo expulsar al miembro.',
+                severidad: 'error',
+                duracionMs: 6000,
+            });
         } finally {
             setAccionEnCurso(null);
         }
@@ -119,16 +136,6 @@ function DialogoVerMiembros({ open, onClose, idFamilia }) {
                     </Typography>
                 </Box>
                 <DialogContent>
-                    {feedback.mensaje && (
-                        <Alert
-                            severity={feedback.tipo === 'error' ? 'error' : 'success'}
-                            onClose={() => setFeedback({ tipo: '', mensaje: '' })}
-                            sx={{ mb: 2 }}
-                        >
-                            {feedback.mensaje}
-                        </Alert>
-                    )}
-
                     {!familia && (
                         <Typography variant="body2" sx={{ color: 'text.secondary' }}>
                             Cargando miembros...

@@ -11,10 +11,11 @@ import {
 import { Coffee, Moon, Sun, Sunset } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import useAuthStore from '../store/authStore';
+import useNotificationStore from '../store/notificationStore';
 import api from '../utils/api';
 import { formatearFechaAmigable } from '../utils/formatosFechas';
-import DialogoProponerReceta from './DialogoProponerReceta';
 import CardTurnoPlanning from './CardTurnoPlanning';
+import DialogoProponerReceta from './DialogoProponerReceta';
 
 const TURNOS_CONFIG = [
     { clave: 'DESAYUNO', titulo: 'Desayuno', icono: <Coffee size={23} color='#ff6900' /> },
@@ -80,6 +81,7 @@ function CardDiaSemanalPlanning({ propuestasDelDia, diaObj, index, recetasRecupe
     const usuarioActual = useAuthStore(state => state.user);
     const tokenUsuario = useAuthStore(state => state.token);
     const idUsuarioActual = usuarioActual?.id_usuario || extraerIdUsuarioDesdeToken(tokenUsuario);
+    const showNotification = useNotificationStore(state => state.showNotification);
 
     const [isUpdating, setIsUpdating] = useState(false);
     const [propuestasVisibles, setPropuestasVisibles] = useState(propuestasDelDia || []);
@@ -128,8 +130,19 @@ function CardDiaSemanalPlanning({ propuestasDelDia, diaObj, index, recetasRecupe
                 await onPropuestaCreada();
             }
 
+            showNotification({
+                mensaje: 'Propuesta actualizada correctamente.',
+                severidad: 'success',
+                duracionMs: 6000,
+            });
+
         } catch (error) {
             console.log('Error guardando:', error);
+            showNotification({
+                mensaje: error?.mensaje || 'No se pudo actualizar la propuesta.',
+                severidad: 'error',
+                duracionMs: 6000,
+            });
         } finally {
             setIsUpdating(false);
         }

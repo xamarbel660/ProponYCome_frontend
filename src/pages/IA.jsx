@@ -2,15 +2,33 @@
  * @fileoverview Asistente de recetas con IA.
  * Permite sugerir recetas por ingredientes y guardarlas en el cuaderno.
  */
-import { Alert, Box, Button, Card, CardActions, CardContent, Chip, CircularProgress, Grid, IconButton, Stack, TextField, Typography, Zoom } from '@mui/material';
+import {
+	Box,
+	Button,
+	Card,
+	CardActions,
+	CardContent,
+	Chip,
+	CircularProgress,
+	Grid,
+	IconButton,
+	Stack,
+	TextField,
+	Typography,
+} from '@mui/material';
 import { BookPlus, Check, Eye, Send, Sparkles } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import DialogoVerReceta from '../components/DialogoVerReceta';
+import useNotificationStore from '../store/notificationStore';
 import api from '../utils/api';
 
 const mensajesCargando = [
 	'Encendiendo los fogones...',
 	'El Chef IA está leyendo tus ingredientes...',
+	'Buscando recetas deliciosas...',
+	'Mezclando sabores y texturas...',
+	'Consultando a la abuela IA por sus secretos culinarios...',
+	'Calculando combinaciones perfectas...',
 	'Creando recetas únicas...'
 ];
 
@@ -28,12 +46,7 @@ function IA() {
 	const [añadiendoReceta, setAñadiendoReceta] = useState(false);
 	const [recetasIARecuperadas, setRecetasIARecuperadas] = useState([]);
 	const [recetasAñadidas, setRecetasAñadidas] = useState([]);
-	// Estado para mostrar alertas
-	const [alerta, setAlerta] = useState({
-		mostrar: false,
-		mensaje: '',
-		severidad: 'success',
-	});
+	const showNotification = useNotificationStore(state => state.showNotification);
 
 	// Efecto para cambiar el mensaje de carga cada 5 segundos mientras isUpdating es true
 	useEffect(() => {
@@ -78,30 +91,20 @@ function IA() {
 				: Array.isArray(datos?.recetas)
 					? datos.recetas
 					: [];
-
-			setRecetasIARecuperadas(recetas);
-			setAlerta({
-				mostrar: true,
+			showNotification({
 				mensaje: 'Recetas sugeridas correctamente',
-				severidad: 'success'
+				severidad: 'success',
+				duracionMs: 5000,
 			});
-
-			// Ocultamos la alerta después de 3 segundos
-			setTimeout(() => {
-				setAlerta(prev => ({ ...prev, mostrar: false }));
-			}, 3000);
+			setRecetasIARecuperadas(recetas);
 		} catch (error) {
 			console.log('Error al enviar:', error);
 			const mensajeError = error?.mensaje || 'Error al obtener recetas sugeridas';
-			setAlerta({
-				mostrar: true,
+			showNotification({
 				mensaje: mensajeError,
-				severidad: 'error'
+				severidad: 'error',
+				duracionMs: 6000,
 			});
-			// Ocultamos la alerta después de 3 segundos
-			setTimeout(() => {
-				setAlerta(prev => ({ ...prev, mostrar: false }));
-			}, 3000);
 		} finally {
 			setIsUpdating(false);
 		}
@@ -136,27 +139,18 @@ function IA() {
 		try {
 			await api.post('/recetas/new', payload);
 			setRecetasAñadidas([...recetasAñadidas, receta.titulo]);
-			setAlerta({
-				mostrar: true,
+			showNotification({
 				mensaje: 'Receta añadida al cuaderno',
-				severidad: 'success'
+				severidad: 'success',
+				duracionMs: 5000,
 			});
-			// Ocultamos la alerta después de 3 segundos
-			setTimeout(() => {
-				setAlerta(prev => ({ ...prev, mostrar: false }));
-			}, 3000);
 		} catch (error) {
 			console.log('Error guardando:', error);
-			// Podrías poner aquí un setErrores({ global: "Error en el servidor" }) si quisieras
-			setAlerta({
-				mostrar: true,
-				mensaje: 'Error al guardar la receta',
-				severidad: 'error'
+			showNotification({
+				mensaje: 'No se pudo guardar la receta. Inténtalo de nuevo.',
+				severidad: 'error',
+				duracionMs: 6000,
 			});
-			// Ocultamos la alerta después de 3 segundos
-			setTimeout(() => {
-				setAlerta(prev => ({ ...prev, mostrar: false }));
-			}, 3000);
 		} finally {
 			setAñadiendoReceta(false);
 		}
@@ -454,34 +448,6 @@ function IA() {
 				open={openDialogVerReceta}
 				onClose={() => setOpenDialogVerReceta(false)}
 			/>
-			{/* Renderizado del mensaje de alerta unificado */}
-			{alerta.mostrar && (
-				<Box
-					sx={{
-						position: 'fixed',
-						top: '83%',
-						left: '50%',
-						transform: 'translate(-50%, -50%)',
-						zIndex: 2000,
-						width: { xs: '90%', sm: 'auto' },
-						minWidth: { sm: 300 },
-					}}
-				>
-					<Zoom in={alerta.mostrar}>
-						<Alert
-							severity={alerta.severidad}
-							variant="filled"
-							sx={{
-								borderRadius: 2,
-								boxShadow: '0px 4px 12px rgba(0,0,0,0.15)',
-								width: '100%',
-							}}
-						>
-							{alerta.mensaje}
-						</Alert>
-					</Zoom>
-				</Box>
-			)}
 		</>
 	);
 }
