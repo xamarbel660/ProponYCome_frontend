@@ -11,7 +11,7 @@ import useNotificationStore from '../store/notificationStore';
  *
  * @type {string|undefined}
  */
-const API_URL = import.meta.env.VITE_API_URL;
+const API_URL = 'http://32.196.4.217:3000/api';
 
 /**
  * Instancia compartida de Axios para todas las peticiones de la app.
