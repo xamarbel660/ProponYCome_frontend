@@ -174,6 +174,18 @@ function CardDiaSemanalPlanning({ propuestasDelDia, diaObj, index, recetasRecupe
         );
     };
 
+    /**
+     * Determina si ya hay una propuesta aprobada en el turno indicado.
+     *
+     * @param {string} turnoComida - Clave de turno a evaluar.
+     * @returns {boolean}
+     */
+    const hayPropuestaAprobada = (turnoComida) => {
+        return propuestasPorTurno(turnoComida).some(
+            propuesta => propuesta.estado === 'APROBADO'
+        );
+    };
+
     return (
         <>
             <Card
@@ -218,7 +230,7 @@ function CardDiaSemanalPlanning({ propuestasDelDia, diaObj, index, recetasRecupe
                                 setTurno(clave);
                                 setOpenDialogo(true);
                             }}
-                            mostrarBotonProponer={!usuarioYaPropusoEnTurno(clave)}
+                            mostrarBotonProponer={!usuarioYaPropusoEnTurno(clave) && !hayPropuestaAprobada(clave)}
                         />
                     ))}
                 </CardContent>

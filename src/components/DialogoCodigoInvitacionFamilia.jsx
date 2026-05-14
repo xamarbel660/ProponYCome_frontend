@@ -1,15 +1,15 @@
 /**
  * @fileoverview Dialogo para visualizar, copiar y regenerar codigo de invitacion familiar.
  */
+import { Clipboard as ClipboardAPI } from '@capacitor/clipboard';
 import { Box, Button, IconButton, Typography } from '@mui/material';
 import Dialog from '@mui/material/Dialog';
 import DialogContent from '@mui/material/DialogContent';
 import TextField from '@mui/material/TextField';
-import { Clipboard, X, Check, Sparkle } from 'lucide-react';
-import { useState, useEffect } from 'react';
-import api from '../utils/api';
-import { Clipboard as ClipboardAPI } from '@capacitor/clipboard';
+import { Check, Clipboard, RefreshCw, X } from 'lucide-react';
+import { useEffect, useState } from 'react';
 import useNotificationStore from '../store/notificationStore';
+import api from '../utils/api';
 
 /**
  * Dialogo de gestion de codigo de invitacion de una familia.
@@ -149,11 +149,11 @@ function DialogoCodigoInvitacion({ open, onClose, esAdmin, nombreFamilia, codigo
                     </IconButton>
                     <Typography variant="h6" sx={{ fontWeight: 'bold' }}>
                         {/* Código QR - {nombreFamilia} */}
-                        Copie el código de invitación
+                        Código de invitación
                     </Typography>
                     <Typography variant="body2" sx={{ color: 'text.secondary', display: 'block' }}>
                         {/* Escanea este código QR para unirte a la familia */}
-                        Código de invitación de {nombreFamilia}
+                        Código de invitación a: {nombreFamilia}
                     </Typography>
                 </Box>
                 {/* Formulario para crear/unirme a una nueva familia */}
@@ -173,7 +173,7 @@ function DialogoCodigoInvitacion({ open, onClose, esAdmin, nombreFamilia, codigo
 
                     {esAdmin && (
                         <Button
-                            startIcon={generado ? <Check /> : <Sparkle />}
+                            startIcon={generado ? <Check /> : <RefreshCw /> }
                             onClick={handleSubmit}
                             fullWidth
                             variant="contained"

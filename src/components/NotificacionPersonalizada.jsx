@@ -29,6 +29,7 @@ function NotificacionPersonalizada({
                 zIndex: 2000,
                 width: { xs: '90%', sm: 'auto' },
                 minWidth: { sm: 300 },
+                pointerEvents: 'none',
             }}
         >
             <Zoom in={mostrar}>
@@ -39,6 +40,7 @@ function NotificacionPersonalizada({
                         borderRadius: 2,
                         boxShadow: '0px 4px 12px rgba(0,0,0,0.15)',
                         width: '100%',
+                        pointerEvents: 'auto',
                     }}
                 >
                     {mensaje}

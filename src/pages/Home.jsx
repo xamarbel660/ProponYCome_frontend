@@ -17,19 +17,18 @@ import {
 	Typography,
 } from '@mui/material';
 import {
+	Bolt,
 	BookOpen,
 	CalendarDays,
-	LogOut,
 	ShoppingCart,
 	Sparkles,
 	Users,
-	UtensilsCrossed,
-	Bolt
+	UtensilsCrossed
 } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { Outlet, useLocation, useNavigate } from 'react-router';
-import useAuthStore from '../store/authStore';
 import Configuracion from '../components/Configuracion';
+import useAuthStore from '../store/authStore';
 
 /**
  * Contenedor principal de la aplicacion autenticada.
@@ -95,6 +94,7 @@ function Home() {
 					>
 						<Avatar
 							sx={{ bgcolor: '#ff6900', width: 45, height: 45, my: 2, mr: 2, borderRadius: 4 }}
+							onClick={() => navigate('/')}
 						>
 							<UtensilsCrossed color="#fff" size={28} />
 						</Avatar>
